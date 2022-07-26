@@ -1,5 +1,4 @@
 https://www.oddsportal.com/soccer/algeria/u21-league/results/#/page/5
-QueryFailedError: SQLITE_CONSTRAINhttps://www.oddsportal.com/soccer/algeria/u21-league/results/#/page/5
 QueryFailedError: SQLITE_CONSTRAINT: NOT NULL constraint failed: fixture.quote1
     at Statement.handler (C:\Users\malii\repo\odds-portal-crawler\node_modules\typeorm\driver\sqlite\SqliteQueryRunner.js:81:26) {
   query: 'INSERT INTO "fixture"("campionat", "league", "date", "team1", "team2", "team1Score", "team2Score", "quote1", "quotex", "quote2", "game") VALUES (?, ?, ?, ?, ?, 1, 4, ?, ?, ?, ?)',

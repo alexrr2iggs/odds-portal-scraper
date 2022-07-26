@@ -2,10 +2,6 @@ import { Repository } from "typeorm";
 import { CrawlSession } from "../entities/crawl-session";
 import { Fixture } from "../entities/fixture";
 
-export asyimport { Repository } from "typeorm";
-import { CrawlSession } from "../entities/crawl-session";
-import { Fixture } from "../entities/fixture";
-
 export async function writeFixtures(fixtures: Fixture[], session: CrawlSession, repoFix: Repository<Fixture>, repoSex: Repository<CrawlSession>) {
     for (const fixture of fixtures) {
         try {

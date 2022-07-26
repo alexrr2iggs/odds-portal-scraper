@@ -22,30 +22,6 @@ export const getPage = (url?: string, options?: GoToPageOptions) => {
 }
 
 
-// export const newPage$ = (import { Browser, Page, PuppeteerLaunchOptions, WaitForOptions } from "puppeteer";
-
-import { launch } from 'puppeteer';
-
-
-type GoToPageOptions = WaitForOptions & { referer?: string; }
-
-
-
-var browser: Browser;
-
-
-
-
-export async function initBrowser(puppeteerLaunchOptions?: PuppeteerLaunchOptions){
-    browser = await launch(puppeteerLaunchOptions);
-}
-export const getPage = (url?: string, options?: GoToPageOptions) => {
-    return browser.newPage()
-        .then((page) => initPage(page))
-        .then((page) => url ? page.goto(url, options).then(() => page) : page);
-}
-
-
 // export const newPage$ = (url?: string, options?: GoToPageOptions) =>
 //     browser$.pipe(
 //         concatMap(browser =>

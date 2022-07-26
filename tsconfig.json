@@ -1,6 +1,4 @@
-@echo off
-node dist/index.js
-pause{
+{
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
     /* Projects */

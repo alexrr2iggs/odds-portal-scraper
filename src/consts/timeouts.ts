@@ -1,0 +1,1 @@
+export const WHAIT_FOR_ELEMENT_TIMEOUT = 30_000;

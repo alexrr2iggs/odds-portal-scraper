@@ -7,9 +7,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, UpdateDateColumn, CreateDateColumn } from "typeorm";
-import { Game } from "../types/sport.js";
-import { CrawlSessionReccord } from "./crawl-session-reccord.js";
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Game } from '../types/sport.js';
+import { CrawlSessionReccord } from './crawl-session-reccord.js';
 var CrawlSession = /** @class */ (function () {
     function CrawlSession() {
     }
@@ -56,7 +56,7 @@ var CrawlSession = /** @class */ (function () {
     return CrawlSession;
 }());
 export { CrawlSession };
-export function crawlSessiontoString(cs) {
-    return "createdAt: " + cs.createdAt + ", game: " + cs.game + ", start: " + cs.start + ", end: " + cs.end + ", totInserted: " + cs.totInserted + ", totLeagues: " + cs.totLeagues;
+export function scrapSessiontoString(cs) {
+    return 'createdAt: ' + cs.createdAt + ', game: ' + cs.game + ', start: ' + cs.start + ', end: ' + cs.end + ', totInserted: ' + cs.totInserted + ', totLeagues: ' + cs.totLeagues;
 }
 //# sourceMappingURL=crawl-session.js.map

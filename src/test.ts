@@ -1,4 +1,4 @@
-import { getFixtures } from './services/fixture.js';
+import { getCampionatList } from './services/campionat.js';
 import { getPage, initBrowser } from './services/puppeter.js';
 
 initBrowser();
@@ -6,9 +6,11 @@ initBrowser();
 (async () => {
 	await initBrowser();
 
-	const page = await getPage('https://www.oddsportal.com/soccer/belgium/belgium-third-division-group-a-2012-2013/results/');
+	const page = await getPage('https://www.oddsportal.com/soccer/slovakia/4-liga-east/results/');
 
-	var fixtures = await getFixtures(page);
+	console.log('start');
+	var fixtures = await getCampionatList(page);
+	console.log('end');
 
 	console.log(fixtures);
 })();

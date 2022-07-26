@@ -34,7 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import { getFixtures } from './services/fixture.js';
+import { getCampionatList } from './services/campionat.js';
 import { getPage, initBrowser } from './services/puppeter.js';
 initBrowser();
 (function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -44,12 +44,14 @@ initBrowser();
             case 0: return [4 /*yield*/, initBrowser()];
             case 1:
                 _a.sent();
-                return [4 /*yield*/, getPage('https://www.oddsportal.com/soccer/belgium/belgium-third-division-group-a-2012-2013/results/')];
+                return [4 /*yield*/, getPage('https://www.oddsportal.com/soccer/slovakia/4-liga-east/results/')];
             case 2:
                 page = _a.sent();
-                return [4 /*yield*/, getFixtures(page)];
+                console.log('start');
+                return [4 /*yield*/, getCampionatList(page)];
             case 3:
                 fixtures = _a.sent();
+                console.log('end');
                 console.log(fixtures);
                 return [2 /*return*/];
         }

@@ -45,33 +45,27 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+import { endDateIn, startDateIn } from './cli/date-input.js';
+import { headlesConfirm } from './cli/headless.js';
 // const { Command } = require('commander');
 import chalk from 'chalk';
-import { Command } from 'commander';
 import inquirer from 'inquirer';
+import { continueInterruptedSession, continueInterruptedSessions } from './cli/continue-unfinished-sessions.js';
+import { selectGame } from './cli/select-game.js';
+import { selectSession } from './cli/select-session.js';
 import { LEAGUES_URL } from './consts/urls.js';
 import { CrawlSessionReccord } from './entities/crawl-session-reccord.js';
-import { CrawlSession, crawlSessiontoString } from './entities/crawl-session.js';
+import { CrawlSession, scrapSessiontoString } from './entities/crawl-session.js';
 import { Fixture } from './entities/fixture.js';
 import { appDataSource } from './orm/orm.js';
 import { getCampionatLastPage, getCampionatList } from './services/campionat.js';
 import { writeError } from './services/error.js';
 import { getFixtures } from './services/fixture.js';
 import { getLeagueList } from './services/league.js';
-import { getPage, initBrowser } from './services/puppeter.js';
-import { Game } from './types/sport.js';
+import { getPage, goto, initBrowser } from './services/puppeter.js';
 import { getMaxMinTimes } from './utils/fixture.js';
 var blue = chalk.hex('054ef7');
 var red = chalk.hex('E4181C');
-var program = new Command();
-program.name('odds portal crowler').description('crowler for odds portal');
-program
-    // .command('scaceesti')
-    .description('Downloads fixtures between 2 dates')
-    .option('-s, --start <string>', 'data dinainiti ii di cind s scaceesti huiniaua')
-    .option('-e, --end', 'data dinainiti ii pan cind s scaceesti huiniaua', new Date().toISOString());
-program.parse();
-var options = program.opts();
 (function () { return __awaiter(void 0, void 0, void 0, function () {
     var ds, repoSession, repoFix, session, previousSessions, puppeteerLaunchOptions, continueOldSession, continueOldSession, selectedSession, newSession, startDate, endDate, startDateTime, endDateTime, startYear, endYear, insertedLeagues, page, leagues, _loop_1, fixtures, _i, leagues_1, league;
     var _a, _b, _c, _d;
@@ -88,132 +82,37 @@ var options = program.opts();
             case 2:
                 previousSessions = _e.sent();
                 if (previousSessions.length) {
-                    console.log('sessiuni neterminate:');
-                    previousSessions.forEach(function (ps) { return console.log(crawlSessiontoString(ps)); });
+                    console.log('interrupted sessions:\n\n');
+                    previousSessions.forEach(function (ps) { return console.log(chalk.bgWhite(chalk.black(scrapSessiontoString(ps)))); });
+                    console.log('\n\n\n\n\n');
                 }
-                return [4 /*yield*/, inquirer.prompt({
-                        name: 'headless',
-                        type: 'list',
-                        message: 'bai pula, vrei sa vezi tat huineaua?',
-                        choices: [
-                            {
-                                name: 'aha',
-                                value: false
-                            },
-                            {
-                                name: 'naha',
-                                value: true
-                            }
-                        ]
-                    })];
+                return [4 /*yield*/, inquirer.prompt(headlesConfirm)];
             case 3:
                 puppeteerLaunchOptions = _e.sent();
                 initBrowser(__assign(__assign({}, puppeteerLaunchOptions), { defaultViewport: { height: 1080, width: 1920 } }));
                 if (!(previousSessions.length === 1)) return [3 /*break*/, 5];
-                return [4 /*yield*/, inquirer.prompt({
-                        name: 'continueOldSession',
-                        type: 'list',
-                        message: 'ba pula, am vazut ca mai inainte ai intrerupt o sessioni neterminata, vrei so termini?',
-                        choices: [
-                            {
-                                name: 'da vreu',
-                                value: true
-                            },
-                            {
-                                name: 'Nu, nu vreu',
-                                value: false
-                            }
-                        ]
-                    })];
+                return [4 /*yield*/, inquirer.prompt(continueInterruptedSession)];
             case 4:
                 continueOldSession = _e.sent();
-                // console.log(continueOldSession);
-                if (continueOldSession.continueOldSession)
+                if (continueOldSession.continueInterruptedSession)
                     session = previousSessions[0];
                 _e.label = 5;
             case 5:
                 if (!(previousSessions.length > 1)) return [3 /*break*/, 8];
-                return [4 /*yield*/, inquirer.prompt({
-                        name: 'continueOldSession',
-                        type: 'list',
-                        message: 'ba pula, am vazut ca mai inainte ai intrerupt niste sessioni neterminate, vrei sa le termini?',
-                        choices: [
-                            {
-                                name: 'Da, te rog',
-                                value: true
-                            },
-                            {
-                                name: 'Mersi mult, da eu nu vreu',
-                                value: false
-                            }
-                        ]
-                    })];
+                return [4 /*yield*/, inquirer.prompt(continueInterruptedSessions)];
             case 6:
                 continueOldSession = _e.sent();
-                if (!continueOldSession.continueOldSession) return [3 /*break*/, 8];
-                return [4 /*yield*/, inquirer.prompt({
-                        name: 'selectedSession',
-                        type: 'list',
-                        message: 'apu ie s to aleji, mai rebdi',
-                        choices: previousSessions.map(function (ps) { return ({
-                            name: crawlSessiontoString(ps),
-                            value: ps
-                        }); })
-                    })];
+                if (!continueOldSession.continueInterruptedSessions) return [3 /*break*/, 8];
+                return [4 /*yield*/, inquirer.prompt(selectSession(previousSessions))];
             case 7:
                 selectedSession = _e.sent();
-                session = selectedSession.selectedSession;
+                session = selectedSession.session;
                 _e.label = 8;
             case 8:
                 if (!!session) return [3 /*break*/, 11];
-                return [4 /*yield*/, inquirer.prompt([
-                        {
-                            name: 'start',
-                            type: 'input',
-                            message: 'di cind trebu de scaceeit huinelili? (scrie o data in format ISO-8601, tipa "2022-07-25")'
-                        },
-                        {
-                            name: 'end',
-                            type: 'input',
-                            message: 'pina cind? daca nu scrii nica apu scaeesc pina amu',
-                            "default": new Date().toISOString()
-                        },
-                        {
-                            name: 'game',
-                            type: 'list',
-                            message: 'si jiuaca vrei?',
-                            choices: [
-                                {
-                                    name: 'futbol',
-                                    value: Game.SOCCER
-                                },
-                                {
-                                    name: 'basket',
-                                    value: Game.BASKETBALL
-                                },
-                                {
-                                    name: 'beizbol',
-                                    value: Game.BASEBALL
-                                }
-                            ]
-                        },
-                        {
-                            name: 'zelenski',
-                            type: 'list',
-                            message: 'zelenski ii petuh?',
-                            choices: [
-                                {
-                                    name: 'da'
-                                },
-                                {
-                                    name: 'Kanechno'
-                                }
-                            ]
-                        }
-                    ])];
+                return [4 /*yield*/, inquirer.prompt([startDateIn, endDateIn, selectGame])];
             case 9:
                 newSession = _e.sent();
-                // const selectedGame = await inquirer.prompt();
                 session = new CrawlSession();
                 session.start = newSession.start;
                 session.end = newSession.end;
@@ -232,7 +131,7 @@ var options = program.opts();
                 endYear = endDate.getFullYear();
                 insertedLeagues = (_a = session === null || session === void 0 ? void 0 : session.reccords) === null || _a === void 0 ? void 0 : _a.map(function (r) { return r.league; });
                 if (startDateTime > endDateTime) {
-                    console.error('wai pula, ai baut??? data dinainiti ii mai mari ca seia dinapoi, sii cu tine???', 'start: ' + options.start, 'end: ' + options.end);
+                    console.error('wai pula, ai baut??? data dinainiti ii mai mari ca seia dinapoi, sii cu tine???', 'start: ' + session.start, 'end: ' + session.end);
                     console.log('hai mai insiarca odat, si nu si timpit');
                     return [2 /*return*/];
                 }
@@ -250,7 +149,7 @@ var options = program.opts();
                                 if (insertedLeagues === null || insertedLeagues === void 0 ? void 0 : insertedLeagues.includes(league.league))
                                     return [2 /*return*/, "continue"];
                                 console.log(red(league.url));
-                                return [4 /*yield*/, page.goto(league.url)];
+                                return [4 /*yield*/, goto(page, league.url)];
                             case 1:
                                 _g.sent();
                                 return [4 /*yield*/, getCampionatList(page)];
@@ -269,7 +168,7 @@ var options = program.opts();
                                                 if (campionatStartYear < startYear || campionatEndYear > endYear)
                                                     return [2 /*return*/, "continue-writeCampionati"];
                                                 console.log(chalk.white(campionat.url));
-                                                return [4 /*yield*/, page.goto(campionat.url)];
+                                                return [4 /*yield*/, goto(page, campionat.url)];
                                             case 1:
                                                 _j.sent();
                                                 return [4 /*yield*/, getCampionatLastPage(page)];
@@ -278,16 +177,18 @@ var options = program.opts();
                                                 currentPageNumber = lastpaPageNr;
                                                 _j.label = 3;
                                             case 3:
-                                                if (!(currentPageNumber > 0)) return [3 /*break*/, 11];
+                                                if (!(currentPageNumber > 0)) return [3 /*break*/, 12];
                                                 URL_1 = campionat.url + '#/page/' + currentPageNumber;
                                                 console.log(blue(URL_1));
-                                                page.goto(URL_1);
-                                                return [4 /*yield*/, getFixtures(page)];
+                                                return [4 /*yield*/, goto(page, URL_1)];
                                             case 4:
+                                                _j.sent();
+                                                return [4 /*yield*/, getFixtures(page)];
+                                            case 5:
                                                 fixtures = _j.sent();
                                                 fixtures = fixtures === null || fixtures === void 0 ? void 0 : fixtures.filter(function (f) { return !!(f === null || f === void 0 ? void 0 : f.date); });
                                                 if (!(fixtures === null || fixtures === void 0 ? void 0 : fixtures.length))
-                                                    return [3 /*break*/, 10];
+                                                    return [3 /*break*/, 11];
                                                 fixtures = fixtures.map(function (fixture) {
                                                     var fixtureEntity = new Fixture(fixture);
                                                     fixtureEntity.campionat = campionat.campionat;
@@ -295,33 +196,33 @@ var options = program.opts();
                                                     fixtureEntity.game = session.game;
                                                     return fixtureEntity;
                                                 });
-                                                _j.label = 5;
-                                            case 5:
-                                                _j.trys.push([5, 8, , 9]);
-                                                return [4 /*yield*/, repoFix.save(fixtures)];
+                                                _j.label = 6;
                                             case 6:
+                                                _j.trys.push([6, 9, , 10]);
+                                                return [4 /*yield*/, repoFix.save(fixtures)];
+                                            case 7:
                                                 _j.sent();
                                                 session.totInserted += fixtures.length;
                                                 return [4 /*yield*/, repoSession.save(session)];
-                                            case 7:
-                                                _j.sent();
-                                                return [3 /*break*/, 9];
                                             case 8:
+                                                _j.sent();
+                                                return [3 /*break*/, 10];
+                                            case 9:
                                                 error_1 = _j.sent();
                                                 console.error(error_1);
                                                 writeError(error_1, fixtures, URL_1);
-                                                return [3 /*break*/, 9];
-                                            case 9:
+                                                return [3 /*break*/, 10];
+                                            case 10:
                                                 _h = getMaxMinTimes(fixtures), minTime = _h[0], maxTime = _h[1];
                                                 if (minTime < startDateTime)
                                                     return [2 /*return*/, "continue-writeCampionati"];
                                                 if (maxTime > endDateTime)
-                                                    return [3 /*break*/, 10];
-                                                _j.label = 10;
-                                            case 10:
+                                                    return [3 /*break*/, 11];
+                                                _j.label = 11;
+                                            case 11:
                                                 currentPageNumber--;
                                                 return [3 /*break*/, 3];
-                                            case 11: return [2 /*return*/];
+                                            case 12: return [2 /*return*/];
                                         }
                                     });
                                 };

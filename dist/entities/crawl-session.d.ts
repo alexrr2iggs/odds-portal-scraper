@@ -1,5 +1,5 @@
-import { Game } from "../types/sport.js";
-import { CrawlSessionReccord } from "./crawl-session-reccord.js";
+import { Game } from '../types/sport.js';
+import { CrawlSessionReccord } from './crawl-session-reccord.js';
 export declare class CrawlSession {
     ID?: number;
     reccords?: CrawlSessionReccord[];
@@ -11,5 +11,5 @@ export declare class CrawlSession {
     createdAt?: number;
     updatedAt?: string;
 }
-export declare function crawlSessiontoString(cs: CrawlSession): string;
+export declare function scrapSessiontoString(cs: CrawlSession): string;
 //# sourceMappingURL=crawl-session.d.ts.map

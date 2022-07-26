@@ -49,9 +49,10 @@ export function initBrowser(puppeteerLaunchOptions) {
     });
 }
 export var getPage = function (url, options) {
-    return browser.newPage()
+    return browser
+        .newPage()
         .then(function (page) { return initPage(page); })
-        .then(function (page) { return url ? page.goto(url, options).then(function () { return page; }) : page; });
+        .then(function (page) { return (url ? goto(page, url, options).then(function () { return page; }) : page); });
 };
 // export const newPage$ = (url?: string, options?: GoToPageOptions) =>
 //     browser$.pipe(
@@ -60,11 +61,7 @@ export var getPage = function (url, options) {
 //                 .then((page) => initPage(page))
 //                 .then((page) => url ? page.goto(url, options).then(() => page) : page)));
 function initPage(page) {
-    page
-        .on('console', function (message) {
-        return console.log('[PAGE-CONSOLE-OUT]', "".concat(message.type().substr(0, 3).toUpperCase(), " ").concat(message.text()));
-    })
-        .on('pageerror', function (_a) {
+    page.on('console', function (message) { return console.log('[PAGE-CONSOLE-OUT]', "".concat(message.type().substr(0, 3).toUpperCase(), " ").concat(message.text())); }).on('pageerror', function (_a) {
         var message = _a.message;
         return console.log(message);
     });
@@ -73,5 +70,8 @@ function initPage(page) {
     // .on('requestfailed', request =>
     //     console.log(`${request.failure().errorText} ${request.url()}`));
     return page;
+}
+export function goto(page, link, options) {
+    return page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3419.0 Safari/537.36').then(function () { return page.goto(link, options); });
 }
 //# sourceMappingURL=puppeter.js.map

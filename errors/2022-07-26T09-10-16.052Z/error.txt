@@ -1,1 +1,0 @@
-SQLITE_CONSTRAINT: UNIQUE constraint failed: fixture.campionat, fixture.league, fixture.date, fixture.team1, fixture.team2

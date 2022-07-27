@@ -34,25 +34,25 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import { getCampionatList } from './services/campionat.js';
 import { getPage, initBrowser } from './services/puppeter.js';
+import { getResults } from './services/results.js';
 initBrowser();
 (function () { return __awaiter(void 0, void 0, void 0, function () {
     var page, fixtures;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, initBrowser()];
+            case 0: return [4 /*yield*/, initBrowser({ headless: false, defaultViewport: { height: 1080, width: 1920 } })];
             case 1:
                 _a.sent();
-                return [4 /*yield*/, getPage('https://www.oddsportal.com/soccer/slovakia/4-liga-east/results/')];
+                return [4 /*yield*/, getPage('https://www.oddsportal.com/baseball/usa/mlb/#/page/1')];
             case 2:
                 page = _a.sent();
                 console.log('start');
-                return [4 /*yield*/, getCampionatList(page)];
+                return [4 /*yield*/, getResults(page)];
             case 3:
                 fixtures = _a.sent();
-                console.log('end');
                 console.log(fixtures);
+                console.log('end');
                 return [2 /*return*/];
         }
     });

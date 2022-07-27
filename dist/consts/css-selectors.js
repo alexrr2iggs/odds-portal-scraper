@@ -1,7 +1,9 @@
 // export const SOCCER_LEAGUES_ANCHORS = '#archive-tables table.table-main [xsid="1"] td a';
 export var SOCCER_CAMPIONAT_ANCHORS = 'div.main-menu2.main-menu-gray ul.main-filter li a';
 export var SOCCER_CAMPIONAT_PAGINATOR_ANCHORS = '#tournamentTable #pagination a';
-export var SOCCER_CAMPIONAT_TBODY = '#tournamentTable tbody';
+export var TOURNAMENT_TABLE_TBODY = '#tournamentTable tbody';
+export var MATCHES_TBODY = '#table-matches tbody';
+export var TOURNAMENT_TABLE_HEADER = '#tournamentTable tbody .center.nob-border';
 export var LEAGUES_ANCHORS = {
     SOCCER: '#archive-tables table.table-main [xsid="1"] td a',
     BASKETBALL: '#archive-tables table.table-main [xsid="3"] td a',

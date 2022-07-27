@@ -1,10 +1,9 @@
 import { time } from 'iggs-utils';
 import { Page } from 'puppeteer';
 import { SOCCER_CAMPIONAT_ANCHORS, SOCCER_CAMPIONAT_PAGINATOR_ANCHORS } from '../consts/css-selectors.js';
-import { WHAIT_FOR_ELEMENT_TIMEOUT } from '../consts/timeouts.js';
+import { NEXT_MATCH, WHAIT_FOR_ELEMENT_TIMEOUT } from '../consts/various.js';
 
 export function getCampionatList(page: Page): Promise<{ campionat: string; url: string }[]> {
-	// document.querySelector('#breadcrumb').innerText === 'The page you requested is not available.';
 	return page
 		.$eval('#breadcrumb', el => el.textContent)
 		.then(textContent => {
@@ -15,6 +14,26 @@ export function getCampionatList(page: Page): Promise<{ campionat: string; url: 
 				.catch(e => {
 					console.error(e);
 					return [];
+				});
+		})
+		.then(campionatList => {
+			return getCampionatNextMatches(page).then(campionatNextMatches => {
+				return campionatNextMatches ? [{ campionat: NEXT_MATCH, url: campionatNextMatches }, ...campionatList] : campionatList;
+			});
+		});
+}
+
+export function getCampionatNextMatches(page: Page): Promise<string> {
+	return page
+		.$eval('#breadcrumb', el => el.textContent)
+		.then(textContent => {
+			if (textContent.trim().toUpperCase() === 'THE PAGE YOU REQUESTED IS NOT AVAILABLE.') return '';
+			return page
+				.waitForSelector('#tournament_menu a', { timeout: WHAIT_FOR_ELEMENT_TIMEOUT })
+				.then(() => page.$$eval('#tournament_menu a', (anchors: HTMLAnchorElement[]) => anchors?.find(a => a?.textContent?.trim()?.toUpperCase() === 'NEXT MATCHES')?.href))
+				.catch(e => {
+					console.error(e);
+					return '';
 				});
 		});
 }

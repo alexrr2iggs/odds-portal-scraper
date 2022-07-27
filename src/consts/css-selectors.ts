@@ -3,7 +3,9 @@ import { Game } from '../types/sport.js';
 // export const SOCCER_LEAGUES_ANCHORS = '#archive-tables table.table-main [xsid="1"] td a';
 export const SOCCER_CAMPIONAT_ANCHORS = 'div.main-menu2.main-menu-gray ul.main-filter li a';
 export const SOCCER_CAMPIONAT_PAGINATOR_ANCHORS = '#tournamentTable #pagination a';
-export const SOCCER_CAMPIONAT_TBODY = '#tournamentTable tbody';
+export const TOURNAMENT_TABLE_TBODY = '#tournamentTable tbody';
+export const MATCHES_TBODY = '#table-matches tbody';
+export const TOURNAMENT_TABLE_HEADER = '#tournamentTable tbody .center.nob-border';
 
 export const LEAGUES_ANCHORS: { [key in Game]: string } = {
 	SOCCER: '#archive-tables table.table-main [xsid="1"] td a',

@@ -47,11 +47,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 import { endDateIn, startDateIn } from './cli/date-input.js';
 import { headlesConfirm } from './cli/headless.js';
+import { NEXT_MATCH } from './consts/various.js';
 // const { Command } = require('commander');
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { continueInterruptedSession, continueInterruptedSessions } from './cli/continue-unfinished-sessions.js';
-import { selectGame } from './cli/select-game.js';
+import { selectGames } from './cli/select-game.js';
 import { selectSession } from './cli/select-session.js';
 import { LEAGUES_URL } from './consts/urls.js';
 import { CrawlSessionReccord } from './entities/crawl-session-reccord.js';
@@ -60,27 +61,27 @@ import { Fixture } from './entities/fixture.js';
 import { appDataSource } from './orm/orm.js';
 import { getCampionatLastPage, getCampionatList } from './services/campionat.js';
 import { writeError } from './services/error.js';
-import { getFixtures } from './services/fixture.js';
 import { getLeagueList } from './services/league.js';
 import { getPage, goto, initBrowser } from './services/puppeter.js';
+import { getResults } from './services/results.js';
 import { getMaxMinTimes } from './utils/fixture.js';
 var blue = chalk.hex('054ef7');
 var red = chalk.hex('E4181C');
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var ds, repoSession, repoFix, session, previousSessions, puppeteerLaunchOptions, continueOldSession, continueOldSession, selectedSession, newSession, startDate, endDate, startDateTime, endDateTime, startYear, endYear, insertedLeagues, page, leagues, _loop_1, fixtures, _i, leagues_1, league;
-    var _a, _b, _c, _d;
-    return __generator(this, function (_e) {
-        switch (_e.label) {
+    var ds, repoSession, repoFix, session, previousSessions, puppeteerLaunchOptions, continueOldSession, continueOldSession, selectedSession, newSession, startDate, endDate, startDateTime, endDateTime, startYear, endYear, insertedLeagues, _loop_1, fixtures, _i, _a, game;
+    var _b, _c, _d, _e;
+    return __generator(this, function (_f) {
+        switch (_f.label) {
             case 0: return [4 /*yield*/, appDataSource.initialize()];
             case 1:
-                ds = _e.sent();
+                ds = _f.sent();
                 repoSession = ds.getRepository(CrawlSession);
                 repoFix = ds.getRepository(Fixture);
                 return [4 /*yield*/, repoSession.find({
                         relations: { reccords: true }
                     })];
             case 2:
-                previousSessions = _e.sent();
+                previousSessions = _f.sent();
                 if (previousSessions.length) {
                     console.log('interrupted sessions:\n\n');
                     previousSessions.forEach(function (ps) { return console.log(chalk.bgWhite(chalk.black(scrapSessiontoString(ps)))); });
@@ -88,40 +89,40 @@ var red = chalk.hex('E4181C');
                 }
                 return [4 /*yield*/, inquirer.prompt(headlesConfirm)];
             case 3:
-                puppeteerLaunchOptions = _e.sent();
+                puppeteerLaunchOptions = _f.sent();
                 initBrowser(__assign(__assign({}, puppeteerLaunchOptions), { defaultViewport: { height: 1080, width: 1920 } }));
                 if (!(previousSessions.length === 1)) return [3 /*break*/, 5];
                 return [4 /*yield*/, inquirer.prompt(continueInterruptedSession)];
             case 4:
-                continueOldSession = _e.sent();
+                continueOldSession = _f.sent();
                 if (continueOldSession.continueInterruptedSession)
                     session = previousSessions[0];
-                _e.label = 5;
+                _f.label = 5;
             case 5:
                 if (!(previousSessions.length > 1)) return [3 /*break*/, 8];
                 return [4 /*yield*/, inquirer.prompt(continueInterruptedSessions)];
             case 6:
-                continueOldSession = _e.sent();
+                continueOldSession = _f.sent();
                 if (!continueOldSession.continueInterruptedSessions) return [3 /*break*/, 8];
                 return [4 /*yield*/, inquirer.prompt(selectSession(previousSessions))];
             case 7:
-                selectedSession = _e.sent();
+                selectedSession = _f.sent();
                 session = selectedSession.session;
-                _e.label = 8;
+                _f.label = 8;
             case 8:
                 if (!!session) return [3 /*break*/, 11];
-                return [4 /*yield*/, inquirer.prompt([startDateIn, endDateIn, selectGame])];
+                return [4 /*yield*/, inquirer.prompt([startDateIn, endDateIn, selectGames])];
             case 9:
-                newSession = _e.sent();
+                newSession = _f.sent();
                 session = new CrawlSession();
                 session.start = newSession.start;
                 session.end = newSession.end;
                 session.reccords = [];
-                session.game = newSession.game;
+                session.games = newSession.games;
                 return [4 /*yield*/, ds.getRepository(CrawlSession).save(session)];
             case 10:
-                session = _e.sent();
-                _e.label = 11;
+                session = _f.sent();
+                _f.label = 11;
             case 11:
                 startDate = new Date(session.start);
                 endDate = new Date(session.end);
@@ -129,151 +130,171 @@ var red = chalk.hex('E4181C');
                 endDateTime = endDate.getTime();
                 startYear = startDate.getFullYear();
                 endYear = endDate.getFullYear();
-                insertedLeagues = (_a = session === null || session === void 0 ? void 0 : session.reccords) === null || _a === void 0 ? void 0 : _a.map(function (r) { return r.league; });
+                insertedLeagues = (_b = session === null || session === void 0 ? void 0 : session.reccords) === null || _b === void 0 ? void 0 : _b.map(function (r) { return r.league; });
                 if (startDateTime > endDateTime) {
                     console.error('wai pula, ai baut??? data dinainiti ii mai mari ca seia dinapoi, sii cu tine???', 'start: ' + session.start, 'end: ' + session.end);
                     console.log('hai mai insiarca odat, si nu si timpit');
                     return [2 /*return*/];
                 }
-                return [4 /*yield*/, getPage(LEAGUES_URL[session.game])];
-            case 12:
-                page = _e.sent();
-                return [4 /*yield*/, getLeagueList(page, session.game)];
-            case 13:
-                leagues = _e.sent();
-                _loop_1 = function (league) {
-                    var campionati, _loop_2, _f, campionati_1, campionat, state_1, reccord;
-                    return __generator(this, function (_g) {
-                        switch (_g.label) {
-                            case 0:
-                                if (insertedLeagues === null || insertedLeagues === void 0 ? void 0 : insertedLeagues.includes(league.league))
-                                    return [2 /*return*/, "continue"];
-                                console.log(red(league.url));
-                                return [4 /*yield*/, goto(page, league.url)];
+                _loop_1 = function (game) {
+                    var page, leagues, _loop_2, _g, leagues_1, league;
+                    return __generator(this, function (_h) {
+                        switch (_h.label) {
+                            case 0: return [4 /*yield*/, getPage(LEAGUES_URL[game])];
                             case 1:
-                                _g.sent();
-                                return [4 /*yield*/, getCampionatList(page)];
+                                page = _h.sent();
+                                return [4 /*yield*/, getLeagueList(page, game)];
                             case 2:
-                                campionati = _g.sent();
-                                _loop_2 = function (campionat) {
-                                    var years, campionatStartYear, campionatEndYear, lastpaPageNr, currentPageNumber, URL_1, error_1, _h, minTime, maxTime;
-                                    return __generator(this, function (_j) {
-                                        switch (_j.label) {
+                                leagues = _h.sent();
+                                _loop_2 = function (league) {
+                                    var campionati, _loop_3, _j, campionati_1, campionat, state_1, reccord;
+                                    return __generator(this, function (_k) {
+                                        switch (_k.label) {
                                             case 0:
-                                                if (!campionat.campionat.length)
-                                                    return [2 /*return*/, "continue-writeCampionati"];
-                                                years = (_d = (_c = (_b = campionat === null || campionat === void 0 ? void 0 : campionat.campionat) === null || _b === void 0 ? void 0 : _b.match(/\d{4}/g)) === null || _c === void 0 ? void 0 : _c.map(function (y) { return +y; })) === null || _d === void 0 ? void 0 : _d.sort();
-                                                campionatStartYear = years[0];
-                                                campionatEndYear = years[1] || years[0];
-                                                if (campionatStartYear < startYear || campionatEndYear > endYear)
-                                                    return [2 /*return*/, "continue-writeCampionati"];
-                                                console.log(chalk.white(campionat.url));
-                                                return [4 /*yield*/, goto(page, campionat.url)];
+                                                if (insertedLeagues === null || insertedLeagues === void 0 ? void 0 : insertedLeagues.includes(league.league))
+                                                    return [2 /*return*/, "continue"];
+                                                console.log(red(league.url));
+                                                return [4 /*yield*/, goto(page, league.url)];
                                             case 1:
-                                                _j.sent();
-                                                return [4 /*yield*/, getCampionatLastPage(page)];
+                                                _k.sent();
+                                                return [4 /*yield*/, getCampionatList(page)];
                                             case 2:
-                                                lastpaPageNr = _j.sent();
-                                                currentPageNumber = lastpaPageNr;
-                                                _j.label = 3;
+                                                campionati = _k.sent();
+                                                _loop_3 = function (campionat) {
+                                                    var years, campionatStartYear, campionatEndYear, lastpaPageNr, currentPageNumber, URL_1, error_1, _l, minTime, maxTime;
+                                                    return __generator(this, function (_m) {
+                                                        switch (_m.label) {
+                                                            case 0:
+                                                                if (!campionat.campionat.length)
+                                                                    return [2 /*return*/, "continue-writeCampionati"];
+                                                                years = (_e = (_d = (_c = campionat === null || campionat === void 0 ? void 0 : campionat.campionat) === null || _c === void 0 ? void 0 : _c.match(/\d{4}/g)) === null || _d === void 0 ? void 0 : _d.map(function (y) { return +y; })) === null || _e === void 0 ? void 0 : _e.sort();
+                                                                campionatStartYear = years === null || years === void 0 ? void 0 : years[0];
+                                                                campionatEndYear = (years === null || years === void 0 ? void 0 : years[1]) || (years === null || years === void 0 ? void 0 : years[0]);
+                                                                if ((campionat === null || campionat === void 0 ? void 0 : campionat.campionat) !== NEXT_MATCH && (campionatStartYear < startYear || campionatEndYear > endYear))
+                                                                    return [2 /*return*/, "continue-writeCampionati"];
+                                                                console.log(chalk.white(campionat.url));
+                                                                return [4 /*yield*/, goto(page, campionat.url)];
+                                                            case 1:
+                                                                _m.sent();
+                                                                return [4 /*yield*/, getCampionatLastPage(page)];
+                                                            case 2:
+                                                                lastpaPageNr = _m.sent();
+                                                                currentPageNumber = lastpaPageNr;
+                                                                _m.label = 3;
+                                                            case 3:
+                                                                if (!(currentPageNumber > 0)) return [3 /*break*/, 12];
+                                                                URL_1 = campionat.url + '#/page/' + currentPageNumber;
+                                                                console.log(blue(URL_1));
+                                                                return [4 /*yield*/, goto(page, URL_1)];
+                                                            case 4:
+                                                                _m.sent();
+                                                                return [4 /*yield*/, getResults(page)];
+                                                            case 5:
+                                                                fixtures = _m.sent();
+                                                                fixtures = fixtures === null || fixtures === void 0 ? void 0 : fixtures.filter(function (f) { return !!(f === null || f === void 0 ? void 0 : f.date); });
+                                                                if (!(fixtures === null || fixtures === void 0 ? void 0 : fixtures.length))
+                                                                    return [3 /*break*/, 11];
+                                                                fixtures = fixtures.map(function (fixture) {
+                                                                    var fixtureEntity = new Fixture(fixture);
+                                                                    fixtureEntity.campionat = campionat.campionat;
+                                                                    fixtureEntity.league = league.league;
+                                                                    fixtureEntity.game = game;
+                                                                    return fixtureEntity;
+                                                                });
+                                                                _m.label = 6;
+                                                            case 6:
+                                                                _m.trys.push([6, 9, , 10]);
+                                                                return [4 /*yield*/, repoFix.save(fixtures)];
+                                                            case 7:
+                                                                _m.sent();
+                                                                session.totInserted += fixtures.length;
+                                                                return [4 /*yield*/, repoSession.save(session)];
+                                                            case 8:
+                                                                _m.sent();
+                                                                return [3 /*break*/, 10];
+                                                            case 9:
+                                                                error_1 = _m.sent();
+                                                                console.error(error_1);
+                                                                writeError(error_1, fixtures, URL_1);
+                                                                return [3 /*break*/, 10];
+                                                            case 10:
+                                                                _l = getMaxMinTimes(fixtures), minTime = _l[0], maxTime = _l[1];
+                                                                if (minTime < startDateTime)
+                                                                    return [2 /*return*/, "continue-writeCampionati"];
+                                                                if (maxTime > endDateTime)
+                                                                    return [3 /*break*/, 11];
+                                                                _m.label = 11;
+                                                            case 11:
+                                                                currentPageNumber--;
+                                                                return [3 /*break*/, 3];
+                                                            case 12: return [2 /*return*/];
+                                                        }
+                                                    });
+                                                };
+                                                _j = 0, campionati_1 = campionati;
+                                                _k.label = 3;
                                             case 3:
-                                                if (!(currentPageNumber > 0)) return [3 /*break*/, 12];
-                                                URL_1 = campionat.url + '#/page/' + currentPageNumber;
-                                                console.log(blue(URL_1));
-                                                return [4 /*yield*/, goto(page, URL_1)];
+                                                if (!(_j < campionati_1.length)) return [3 /*break*/, 6];
+                                                campionat = campionati_1[_j];
+                                                return [5 /*yield**/, _loop_3(campionat)];
                                             case 4:
-                                                _j.sent();
-                                                return [4 /*yield*/, getFixtures(page)];
+                                                state_1 = _k.sent();
+                                                switch (state_1) {
+                                                    case "continue-writeCampionati": return [3 /*break*/, 5];
+                                                }
+                                                _k.label = 5;
                                             case 5:
-                                                fixtures = _j.sent();
-                                                fixtures = fixtures === null || fixtures === void 0 ? void 0 : fixtures.filter(function (f) { return !!(f === null || f === void 0 ? void 0 : f.date); });
-                                                if (!(fixtures === null || fixtures === void 0 ? void 0 : fixtures.length))
-                                                    return [3 /*break*/, 11];
-                                                fixtures = fixtures.map(function (fixture) {
-                                                    var fixtureEntity = new Fixture(fixture);
-                                                    fixtureEntity.campionat = campionat.campionat;
-                                                    fixtureEntity.league = league.league;
-                                                    fixtureEntity.game = session.game;
-                                                    return fixtureEntity;
-                                                });
-                                                _j.label = 6;
+                                                _j++;
+                                                return [3 /*break*/, 3];
                                             case 6:
-                                                _j.trys.push([6, 9, , 10]);
-                                                return [4 /*yield*/, repoFix.save(fixtures)];
+                                                session.totLeagues++;
+                                                reccord = new CrawlSessionReccord();
+                                                reccord.crawlSession = session;
+                                                reccord.league = league.league;
+                                                session.reccords.push(reccord);
+                                                return [4 /*yield*/, ds.getRepository(CrawlSessionReccord).save(reccord)];
                                             case 7:
-                                                _j.sent();
-                                                session.totInserted += fixtures.length;
+                                                _k.sent();
                                                 return [4 /*yield*/, repoSession.save(session)];
                                             case 8:
-                                                _j.sent();
-                                                return [3 /*break*/, 10];
-                                            case 9:
-                                                error_1 = _j.sent();
-                                                console.error(error_1);
-                                                writeError(error_1, fixtures, URL_1);
-                                                return [3 /*break*/, 10];
-                                            case 10:
-                                                _h = getMaxMinTimes(fixtures), minTime = _h[0], maxTime = _h[1];
-                                                if (minTime < startDateTime)
-                                                    return [2 /*return*/, "continue-writeCampionati"];
-                                                if (maxTime > endDateTime)
-                                                    return [3 /*break*/, 11];
-                                                _j.label = 11;
-                                            case 11:
-                                                currentPageNumber--;
-                                                return [3 /*break*/, 3];
-                                            case 12: return [2 /*return*/];
+                                                _k.sent();
+                                                return [2 /*return*/];
                                         }
                                     });
                                 };
-                                _f = 0, campionati_1 = campionati;
-                                _g.label = 3;
+                                _g = 0, leagues_1 = leagues;
+                                _h.label = 3;
                             case 3:
-                                if (!(_f < campionati_1.length)) return [3 /*break*/, 6];
-                                campionat = campionati_1[_f];
-                                return [5 /*yield**/, _loop_2(campionat)];
+                                if (!(_g < leagues_1.length)) return [3 /*break*/, 6];
+                                league = leagues_1[_g];
+                                return [5 /*yield**/, _loop_2(league)];
                             case 4:
-                                state_1 = _g.sent();
-                                switch (state_1) {
-                                    case "continue-writeCampionati": return [3 /*break*/, 5];
-                                }
-                                _g.label = 5;
+                                _h.sent();
+                                _h.label = 5;
                             case 5:
-                                _f++;
+                                _g++;
                                 return [3 /*break*/, 3];
-                            case 6:
-                                session.totLeagues++;
-                                reccord = new CrawlSessionReccord();
-                                reccord.crawlSession = session;
-                                reccord.league = league.league;
-                                session.reccords.push(reccord);
-                                return [4 /*yield*/, ds.getRepository(CrawlSessionReccord).save(reccord)];
-                            case 7:
-                                _g.sent();
-                                return [4 /*yield*/, repoSession.save(session)];
-                            case 8:
-                                _g.sent();
-                                return [2 /*return*/];
+                            case 6: return [2 /*return*/];
                         }
                     });
                 };
-                _i = 0, leagues_1 = leagues;
-                _e.label = 14;
+                _i = 0, _a = session.games;
+                _f.label = 12;
+            case 12:
+                if (!(_i < _a.length)) return [3 /*break*/, 15];
+                game = _a[_i];
+                return [5 /*yield**/, _loop_1(game)];
+            case 13:
+                _f.sent();
+                _f.label = 14;
             case 14:
-                if (!(_i < leagues_1.length)) return [3 /*break*/, 17];
-                league = leagues_1[_i];
-                return [5 /*yield**/, _loop_1(league)];
-            case 15:
-                _e.sent();
-                _e.label = 16;
-            case 16:
                 _i++;
-                return [3 /*break*/, 14];
-            case 17:
+                return [3 /*break*/, 12];
+            case 15:
                 console.log(chalk.greenBright('wai, so terminat!'));
                 return [4 /*yield*/, ds.getRepository(CrawlSession).remove(session)];
-            case 18:
-                _e.sent();
+            case 16:
+                _f.sent();
                 return [2 /*return*/];
         }
     });

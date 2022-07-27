@@ -1,4 +1,4 @@
-import { Game } from "../types/sport.js";
+import { Game } from '../types/sport.js';
 export declare class Fixture {
     constructor(fixture?: Fixture);
     campionat?: string;

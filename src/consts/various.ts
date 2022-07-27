@@ -1,1 +1,2 @@
 export const WHAIT_FOR_ELEMENT_TIMEOUT = 30_000;
+export const NEXT_MATCH = 'NEXT_MATCH';

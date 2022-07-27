@@ -1,14 +1,18 @@
-import { SOCCER_CAMPIONAT_TBODY } from '../consts/css-selectors.js';
-export function getFixtures(page) {
+import { MATCHES_TBODY } from '../consts/css-selectors.js';
+export function getMatches(page) {
     return page
-        .waitForSelector(SOCCER_CAMPIONAT_TBODY, { timeout: 2000000 })
+        .waitForSelector(MATCHES_TBODY, { timeout: 2000000 })
         .then(function () {
-        return page.$eval(SOCCER_CAMPIONAT_TBODY, function (table) {
+        return page.$eval(MATCHES_TBODY, function (table) {
+            //taking the date as a string from page path, format: /matches/ 2020-01-01
+            var path = window.location.pathname.split('/');
+            var datestr = path[path.length - 2];
+            var dateStrFormatted = datestr.substring(0, 4) + '-' + datestr.substring(4, 6) + '-' + datestr.substring(6, 8);
             var retVal = [];
             var parseQuote = function (str) { return (str === '-' ? -1 : +str); };
             var getCleanTxt = function (el) { return el.textContent.trim(); };
-            var getDateTh = function (tr) { return tr.querySelector('th.first2.tl'); };
             var getTimeTd = function (tr) { return tr.querySelector('td.table-time'); };
+            var getLeague = function (tr) { return tr.querySelector('td.table-time'); };
             var getTeamsStr = function (tr) { return tr.querySelector('.table-participant').textContent; };
             var getTeams = function (tr) {
                 return getTeamsStr(tr)
@@ -39,39 +43,27 @@ export function getFixtures(page) {
                 var YYYY = date.getFullYear();
                 return [YYYY, MM, dd].join('-');
             };
-            var getDateStr = function (tr) {
-                var dateStr = getDateTh(tr).innerText.trim();
-                var matches = /\d{2}\s[a-z|A-Z]{3}\s\d{4}/.exec(dateStr);
-                if (!(matches === null || matches === void 0 ? void 0 : matches.length)) {
-                    if (dateStr.startsWith('Today'))
-                        return YYYYMMdd(new Date());
-                    if (dateStr.startsWith('Yesterday'))
-                        return YYYYMMdd(new Date(Date.now() - 24 * 60 * 60 * 1000));
-                    console.error("caroci esti o problema, asta ii datat strana: '", dateStr + "'");
-                    return;
-                }
-                return matches[0];
-            };
             var getHourStr = function (tr) {
                 var dateStr = getTimeTd(tr).innerText;
                 return dateStr.trim();
             };
-            var actualDateStr;
+            var league;
+            var campionat;
             for (var i = 0; i < table.rows.length; i++) {
                 var tr = table.rows[i];
-                if (tr.classList.contains('nob-border')) {
-                    actualDateStr = getDateStr(tr);
+                if (tr.className === 'dark center') {
+                    continue;
                 }
-                if (tr.classList.contains('deactivate') && (actualDateStr === null || actualDateStr === void 0 ? void 0 : actualDateStr.length)) {
+                if (tr.classList.contains('deactivate')) {
                     var time = getHourStr(tr);
-                    var dateTimeStr = actualDateStr + ' ' + time;
+                    var dateTimeStr = dateStrFormatted + ' ' + time;
                     var date;
                     try {
                         date = new Date(dateTimeStr).toISOString();
                     }
                     catch (error) {
-                        console.error('suka bliaty sint ptoblemi...');
-                        console.error('data: ' + actualDateStr, 'uara: ' + time, 'data uara: ' + dateTimeStr);
+                        console.error('date parsing error, future mathes...');
+                        console.error('date: ' + dateStrFormatted, 'time: ' + time, 'date time: ' + dateTimeStr);
                         console.error(error);
                     }
                     var _a = getTeams(tr), team1 = _a[0], team2 = _a[1];
@@ -95,4 +87,4 @@ export function getFixtures(page) {
         return [];
     });
 }
-//# sourceMappingURL=fixture.js.map
+//# sourceMappingURL=matches.js.map

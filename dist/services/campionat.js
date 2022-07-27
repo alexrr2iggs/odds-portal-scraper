@@ -1,8 +1,16 @@
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 import { time } from 'iggs-utils';
 import { SOCCER_CAMPIONAT_ANCHORS, SOCCER_CAMPIONAT_PAGINATOR_ANCHORS } from '../consts/css-selectors.js';
-import { WHAIT_FOR_ELEMENT_TIMEOUT } from '../consts/timeouts.js';
+import { NEXT_MATCH, WHAIT_FOR_ELEMENT_TIMEOUT } from '../consts/various.js';
 export function getCampionatList(page) {
-    // document.querySelector('#breadcrumb').innerText === 'The page you requested is not available.';
     return page
         .$eval('#breadcrumb', function (el) { return el.textContent; })
         .then(function (textContent) {
@@ -13,6 +21,25 @@ export function getCampionatList(page) {
             .then(function () { return page.$$eval(SOCCER_CAMPIONAT_ANCHORS, function (anchors) { return anchors === null || anchors === void 0 ? void 0 : anchors.map(function (anchor) { return ({ campionat: anchor.textContent, url: anchor.href }); }); }); })["catch"](function (e) {
             console.error(e);
             return [];
+        });
+    })
+        .then(function (campionatList) {
+        return getCampionatNextMatches(page).then(function (campionatNextMatches) {
+            return campionatNextMatches ? __spreadArray([{ campionat: NEXT_MATCH, url: campionatNextMatches }], campionatList, true) : campionatList;
+        });
+    });
+}
+export function getCampionatNextMatches(page) {
+    return page
+        .$eval('#breadcrumb', function (el) { return el.textContent; })
+        .then(function (textContent) {
+        if (textContent.trim().toUpperCase() === 'THE PAGE YOU REQUESTED IS NOT AVAILABLE.')
+            return '';
+        return page
+            .waitForSelector('#tournament_menu a', { timeout: WHAIT_FOR_ELEMENT_TIMEOUT })
+            .then(function () { return page.$$eval('#tournament_menu a', function (anchors) { var _a; return (_a = anchors === null || anchors === void 0 ? void 0 : anchors.find(function (a) { var _a, _b; return ((_b = (_a = a === null || a === void 0 ? void 0 : a.textContent) === null || _a === void 0 ? void 0 : _a.trim()) === null || _b === void 0 ? void 0 : _b.toUpperCase()) === 'NEXT MATCHES'; })) === null || _a === void 0 ? void 0 : _a.href; }); })["catch"](function (e) {
+            console.error(e);
+            return '';
         });
     });
 }

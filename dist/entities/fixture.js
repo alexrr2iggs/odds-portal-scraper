@@ -7,8 +7,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Entity, Column, PrimaryColumn } from "typeorm";
-import { Game } from "../types/sport.js";
+import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Game } from '../types/sport.js';
 var Fixture = /** @class */ (function () {
     function Fixture(fixture) {
         this.campionat = fixture === null || fixture === void 0 ? void 0 : fixture.campionat;
@@ -23,7 +23,7 @@ var Fixture = /** @class */ (function () {
         this.quote2 = fixture === null || fixture === void 0 ? void 0 : fixture.quote2;
     }
     __decorate([
-        PrimaryColumn(),
+        Column(),
         __metadata("design:type", String)
     ], Fixture.prototype, "campionat");
     __decorate([

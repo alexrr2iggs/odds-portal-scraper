@@ -3,7 +3,7 @@ import { CrawlSessionReccord } from './crawl-session-reccord.js';
 export declare class CrawlSession {
     ID?: number;
     reccords?: CrawlSessionReccord[];
-    game?: Game;
+    games?: Game[];
     start?: string;
     end?: string;
     totInserted?: number;

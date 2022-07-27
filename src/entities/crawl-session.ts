@@ -1,6 +1,16 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { bytes } from 'iggs-utils';
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, ValueTransformer } from 'typeorm';
 import { Game } from '../types/sport.js';
 import { CrawlSessionReccord } from './crawl-session-reccord.js';
+
+const gamesTransformer: ValueTransformer = {
+	to: function (games: Game[]) {
+		return JSON.stringify(games);
+	},
+	from: function (value: string) {
+		return JSON.parse(value);
+	}
+};
 
 @Entity()
 export class CrawlSession {
@@ -11,8 +21,8 @@ export class CrawlSession {
 	@JoinColumn()
 	reccords?: CrawlSessionReccord[];
 
-	@Column({ nullable: true })
-	game?: Game;
+	@Column({ type: 'varchar', length: 5 * bytes.kB, transformer: gamesTransformer })
+	games?: Game[];
 
 	@Column()
 	start?: string;
@@ -34,5 +44,5 @@ export class CrawlSession {
 }
 
 export function scrapSessiontoString(cs: CrawlSession): string {
-	return 'createdAt: ' + cs.createdAt + ', game: ' + cs.game + ', start: ' + cs.start + ', end: ' + cs.end + ', totInserted: ' + cs.totInserted + ', totLeagues: ' + cs.totLeagues;
+	return 'createdAt: ' + cs.createdAt + ', game: ' + cs.games + ', start: ' + cs.start + ', end: ' + cs.end + ', totInserted: ' + cs.totInserted + ', totLeagues: ' + cs.totLeagues;
 }

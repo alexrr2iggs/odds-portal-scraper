@@ -6,8 +6,8 @@ type GoToPageOptions = WaitForOptions & { referer?: string };
 
 var browser: Browser;
 
-export async function initBrowser(puppeteerLaunchOptions?: PuppeteerLaunchOptions) {
-	browser = await launch(puppeteerLaunchOptions);
+export async function initBrowser(puppeteerLaunchOptions: PuppeteerLaunchOptions = {}) {
+	browser = await launch({ ...puppeteerLaunchOptions });
 }
 export const getPage = (url?: string, options?: GoToPageOptions) => {
 	return browser

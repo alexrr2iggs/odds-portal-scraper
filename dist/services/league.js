@@ -1,5 +1,5 @@
 import { LEAGUES_ANCHORS } from '../consts/css-selectors.js';
-import { WHAIT_FOR_ELEMENT_TIMEOUT } from './../consts/timeouts.js';
+import { WHAIT_FOR_ELEMENT_TIMEOUT } from '../consts/various.js';
 export function getLeagueList(page, game) {
     return page
         .waitForSelector(LEAGUES_ANCHORS[game], { timeout: WHAIT_FOR_ELEMENT_TIMEOUT })

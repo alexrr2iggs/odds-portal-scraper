@@ -1,47 +1,34 @@
 import { Page } from 'puppeteer';
-import { SOCCER_CAMPIONAT_TBODY } from '../consts/css-selectors.js';
 import { Fixture } from '../entities/fixture.js';
+import { TOURNAMENT_TABLE_TBODY } from './../consts/css-selectors.js';
 
-export function getFixtures(page: Page): Promise<Fixture[]> {
+export function getResults(page: Page): Promise<Fixture[]> {
 	return page
-		.waitForSelector(SOCCER_CAMPIONAT_TBODY, { timeout: 2000_000 })
+		.waitForSelector(TOURNAMENT_TABLE_TBODY, { timeout: 2000_000 })
 		.then(() =>
-			page.$eval(SOCCER_CAMPIONAT_TBODY, (table: HTMLTableElement) => {
-				const retVal: Fixture[] = [];
+			page.$eval(TOURNAMENT_TABLE_TBODY, (table: HTMLTableElement) => {
+				///--------------------- UTIL FUNCTIONS ---------------------///
+				const getCleanTxt = (el: HTMLElement) => (el?.innerText || el?.textContent)?.trim();
 				const parseQuote = (str: string) => (str === '-' ? -1 : +str);
-				const getCleanTxt = (el: HTMLElement) => el.textContent.trim();
 				const getDateTh = (tr: HTMLTableRowElement) => tr.querySelector('th.first2.tl') as HTMLTableCellElement;
 				const getTimeTd = (tr: HTMLTableRowElement) => tr.querySelector('td.table-time') as HTMLTableCellElement;
-				const getTeamsStr = (tr: HTMLTableRowElement) => tr.querySelector('.table-participant').textContent;
+				const getTeamsStr = (tr: HTMLTableRowElement) => getCleanTxt(tr.querySelector('.table-participant'));
 				const getTeams = (tr: HTMLTableRowElement) =>
 					getTeamsStr(tr)
 						.split(' - ')
 						.map(t => t.trim());
+
 				const getScores = (tr: HTMLTableRowElement) => {
-					const txt = tr.querySelector('.table-score').textContent.replace(/\s/g, '');
-					const cleanTxt = /\d+:\d+/g.exec(txt)?.[0];
+					const scoresTd = tr.querySelector('.table-score');
+					const txt = getCleanTxt(scoresTd as HTMLElement)?.replace(/\s/g, '');
+					const cleanTxt = /\d+:\d+/g?.exec(txt)?.[0];
 					return cleanTxt?.split(':')?.map(s => +s) || [];
 				};
 
-				const getQuote1 = (tr: HTMLTableRowElement) => parseQuote(getCleanTxt(tr.querySelectorAll('td').item(3)));
-
-				const getQuotex = (tr: HTMLTableRowElement) => {
-					const items = tr.querySelectorAll('td');
-					if (items.length === 7) {
-						//return +items.item(4).innerText.trim();
-						return parseQuote(getCleanTxt(tr.querySelectorAll('td').item(4)));
-					}
-				};
-				const getQuote2 = (tr: HTMLTableRowElement) => {
-					const items = tr.querySelectorAll('td');
-					return parseQuote(getCleanTxt(items.item(items.length - 2)));
-				};
-
 				const YYYYMMdd = (date: Date) => {
-					const now = new Date();
-					const dd = now.getDate();
-					const MM = now.getMonth() + 1;
-					const YYYY = now.getFullYear();
+					const dd = date.getDate();
+					const MM = date.getMonth() + 1;
+					const YYYY = date.getFullYear();
 					return [YYYY, MM, dd].join('-');
 				};
 
@@ -51,6 +38,7 @@ export function getFixtures(page: Page): Promise<Fixture[]> {
 					if (!matches?.length) {
 						if (dateStr.startsWith('Today')) return YYYYMMdd(new Date());
 						if (dateStr.startsWith('Yesterday')) return YYYYMMdd(new Date(Date.now() - 24 * 60 * 60 * 1000));
+						if (dateStr.startsWith('Tomorrow')) return YYYYMMdd(new Date(Date.now() + 24 * 60 * 60 * 1000));
 
 						console.error("caroci esti o problema, asta ii datat strana: '", dateStr + "'");
 						return;
@@ -63,6 +51,10 @@ export function getFixtures(page: Page): Promise<Fixture[]> {
 					return dateStr.trim();
 				};
 
+				///--------------------- END UTIL FUNCTIONS ---------------------///
+
+				const retVal: Fixture[] = [];
+
 				let actualDateStr: string;
 
 				for (var i = 0; i < table.rows.length; i++) {
@@ -72,17 +64,29 @@ export function getFixtures(page: Page): Promise<Fixture[]> {
 						actualDateStr = getDateStr(tr);
 					}
 
-					if (tr.classList.contains('deactivate') && actualDateStr?.length) {
+					if ((tr.classList.contains('odd') || tr.classList.contains('deactivate') || tr.attributes.getNamedItem('xeid')) && actualDateStr?.length) {
 						const time = getHourStr(tr);
 						const dateTimeStr = actualDateStr + ' ' + time;
 						var date: string;
 						try {
-							date = new Date(dateTimeStr).toISOString();
+							date = new Date(dateTimeStr + ' Z').toISOString();
+							// date = YYYYMMdd(new Date(dateTimeStr)) + ' ' + time;
 						} catch (error) {
 							console.error('suka bliaty sint ptoblemi...');
 							console.error('data: ' + actualDateStr, 'uara: ' + time, 'data uara: ' + dateTimeStr);
 							console.error(error);
 						}
+
+						const tdLEn = tr.querySelectorAll('td').length;
+						const isNext = !tr.querySelector('td.table-score');
+						const hasX = tdLEn === 7 || (tdLEn === 6 && isNext);
+
+						var quote1Index = isNext ? 2 : 3;
+
+						const quote1 = parseQuote(getCleanTxt(tr.childNodes.item(quote1Index) as HTMLTableCellElement));
+						const quotex = hasX ? parseQuote(getCleanTxt(tr.childNodes.item(quote1Index + 1) as HTMLTableCellElement)) : undefined;
+						const quote2 = parseQuote(getCleanTxt(tr.childNodes.item(tdLEn - 2) as HTMLTableCellElement));
+
 						const [team1, team2] = getTeams(tr);
 						const [team1Score, team2Score] = getScores(tr);
 						retVal.push({
@@ -91,10 +95,12 @@ export function getFixtures(page: Page): Promise<Fixture[]> {
 							team2,
 							team1Score,
 							team2Score,
-							quote1: getQuote1(tr),
-							quotex: getQuotex(tr),
-							quote2: getQuote2(tr)
+							quote1,
+							quotex,
+							quote2
 						} as any);
+						// (tr.childNodes.item(0) as HTMLElement).innerText += ' ✔️';
+						// (tr.childNodes.item(0) as HTMLElement).style.color = 'green';
 					}
 				}
 				return retVal;

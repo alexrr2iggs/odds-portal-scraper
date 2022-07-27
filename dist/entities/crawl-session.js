@@ -7,9 +7,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+import { bytes } from 'iggs-utils';
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { Game } from '../types/sport.js';
 import { CrawlSessionReccord } from './crawl-session-reccord.js';
+var gamesTransformer = {
+    to: function (games) {
+        return JSON.stringify(games);
+    },
+    from: function (value) {
+        return JSON.parse(value);
+    }
+};
 var CrawlSession = /** @class */ (function () {
     function CrawlSession() {
     }
@@ -23,9 +31,9 @@ var CrawlSession = /** @class */ (function () {
         __metadata("design:type", Array)
     ], CrawlSession.prototype, "reccords");
     __decorate([
-        Column({ nullable: true }),
-        __metadata("design:type", String)
-    ], CrawlSession.prototype, "game");
+        Column({ type: 'varchar', length: 5 * bytes.kB, transformer: gamesTransformer }),
+        __metadata("design:type", Array)
+    ], CrawlSession.prototype, "games");
     __decorate([
         Column(),
         __metadata("design:type", String)
@@ -57,6 +65,6 @@ var CrawlSession = /** @class */ (function () {
 }());
 export { CrawlSession };
 export function scrapSessiontoString(cs) {
-    return 'createdAt: ' + cs.createdAt + ', game: ' + cs.game + ', start: ' + cs.start + ', end: ' + cs.end + ', totInserted: ' + cs.totInserted + ', totLeagues: ' + cs.totLeagues;
+    return 'createdAt: ' + cs.createdAt + ', game: ' + cs.games + ', start: ' + cs.start + ', end: ' + cs.end + ', totInserted: ' + cs.totInserted + ', totLeagues: ' + cs.totLeagues;
 }
 //# sourceMappingURL=crawl-session.js.map

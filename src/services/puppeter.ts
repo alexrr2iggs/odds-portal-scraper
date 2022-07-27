@@ -1,6 +1,7 @@
 import { Browser, Page, PuppeteerLaunchOptions, WaitForOptions } from 'puppeteer';
 
 import { launch } from 'puppeteer';
+import { writeError } from './error';
 
 type GoToPageOptions = WaitForOptions & { referer?: string };
 
@@ -24,7 +25,11 @@ export const getPage = (url?: string, options?: GoToPageOptions) => {
 //                 .then((page) => url ? page.goto(url, options).then(() => page) : page)));
 
 function initPage(page: Page) {
-	page.on('console', message => console.log('[PAGE-CONSOLE-OUT]', `${message.type().substr(0, 3).toUpperCase()} ${message.text()}`)).on('pageerror', ({ message }) => console.log(message));
+	page.on('console', message => console.log('[PAGE-CONSOLE-OUT]', `${message.type().substr(0, 3).toUpperCase()} ${message.text()}`));
+	page.on('pageerror', (error: Error) => {
+		console.error(error);
+		writeError(error, [], page.url());
+	});
 	// .on('response', response =>
 	//     console.log(`${response.status()} ${response.url()}`))
 	// .on('requestfailed', request =>

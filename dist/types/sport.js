@@ -1,6 +1,7 @@
 /**_an_enum_representing_all_sport_present_at_https://www.oddsportal.com/results/#esports_*/
 export var Game;
 (function (Game) {
+    Game["CRICKET"] = "CRICKET";
     Game["SOCCER"] = "SOCCER";
     Game["BASKETBALL"] = "BASKETBALL";
     Game["BASEBALL"] = "BASEBALL";
@@ -13,7 +14,6 @@ export var Game;
     Game["BEACH_SOCCER"] = "BEACH_SOCCER";
     Game["BEACH_VOLLEYBALL"] = "BEACH_VOLLEYBALL";
     Game["BOXING"] = "BOXING";
-    Game["CRICKET"] = "CRICKET";
     Game["DARTS"] = "DARTS";
     Game["FLOORBALL"] = "FLOORBALL";
     Game["FUTSAL"] = "FUTSAL";

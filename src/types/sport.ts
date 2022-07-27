@@ -1,5 +1,6 @@
 /**_an_enum_representing_all_sport_present_at_https://www.oddsportal.com/results/#esports_*/
 export enum Game {
+	CRICKET = 'CRICKET',
 	SOCCER = 'SOCCER',
 	BASKETBALL = 'BASKETBALL',
 	BASEBALL = 'BASEBALL',
@@ -12,7 +13,6 @@ export enum Game {
 	BEACH_SOCCER = 'BEACH_SOCCER',
 	BEACH_VOLLEYBALL = 'BEACH_VOLLEYBALL',
 	BOXING = 'BOXING',
-	CRICKET = 'CRICKET',
 	DARTS = 'DARTS',
 	FLOORBALL = 'FLOORBALL',
 	FUTSAL = 'FUTSAL',

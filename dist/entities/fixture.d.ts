@@ -12,5 +12,7 @@ export declare class Fixture {
     quotex: number;
     quote2: number;
     game: Game;
+    createdAt?: number;
+    updatedAt?: string;
 }
 //# sourceMappingURL=fixture.d.ts.map

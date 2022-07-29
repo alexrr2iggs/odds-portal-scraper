@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Game } from '../types/sport.js';
 
 @Entity()
@@ -51,4 +51,10 @@ export class Fixture {
 
 	@Column()
 	game: Game;
+
+	@CreateDateColumn({ default: new Date().toISOString() })
+	createdAt?: number;
+
+	@UpdateDateColumn({ default: new Date().toISOString() })
+	updatedAt?: string;
 }

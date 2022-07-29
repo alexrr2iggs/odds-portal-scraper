@@ -3,6 +3,7 @@ import { headlesConfirm } from './cli/headless.js';
 import { NEXT_MATCH } from './consts/various.js';
 // const { Command } = require('commander');
 import chalk from 'chalk';
+import { time } from 'iggs-utils';
 import inquirer from 'inquirer';
 import { PuppeteerLaunchOptions } from 'puppeteer';
 import { continueInterruptedSession, continueInterruptedSessions } from './cli/continue-unfinished-sessions.js';
@@ -16,12 +17,17 @@ import { appDataSource } from './orm/orm.js';
 import { getCampionatLastPage, getCampionatList } from './services/campionat.js';
 import { writeError } from './services/error.js';
 import { getLeagueList } from './services/league.js';
-import { getPage, goto, initBrowser } from './services/puppeter.js';
+import { getPage, getTTotpagesVisited, initBrowser, navigate } from './services/puppeter.js';
 import { getResults } from './services/results.js';
 import { getMaxMinTimes } from './utils/fixture.js';
 
-const blue = chalk.hex('054ef7');
-const red = chalk.hex('E4181C');
+const BLUE_HEX = '0072CE';
+const RED_HEX = 'E4181C';
+
+const blueFg = chalk.hex(BLUE_HEX);
+const redFg = chalk.hex(RED_HEX);
+const blueBg = chalk.bgHex(BLUE_HEX);
+const redBg = chalk.bgHex(RED_HEX);
 
 (async () => {
 	const ds = await appDataSource.initialize();
@@ -42,7 +48,7 @@ const red = chalk.hex('E4181C');
 
 	const puppeteerLaunchOptions = await inquirer.prompt<PuppeteerLaunchOptions>(headlesConfirm);
 
-	initBrowser({
+	await initBrowser({
 		...puppeteerLaunchOptions,
 		defaultViewport: { height: 1080, width: 1920 }
 		// slowMo: 200
@@ -87,16 +93,20 @@ const red = chalk.hex('E4181C');
 		console.log('hai mai insiarca odat, si nu si timpit');
 		return;
 	}
+
+	const startScrapping = Date.now();
+
 	for (const game of session.games) {
+		console.log(redFg(`🔎 looking for LEAGUES, game: ${game}: ${LEAGUES_URL[game]}`));
 		const page = await getPage(LEAGUES_URL[game]);
 		const leagues = await getLeagueList(page, game);
 
 		for (const league of leagues) {
 			if (insertedLeagues?.includes(league.league)) continue;
 
-			console.log(red(league.url));
-			await goto(page, league.url);
+			await navigate(page, league.url);
 
+			console.log(redFg(`🔎 looking for CAMPIONATI, league: ${league?.league}: ${league?.url}`));
 			const campionati = await getCampionatList(page);
 
 			writeCampionati: for (const campionat of campionati) {
@@ -112,17 +122,30 @@ const red = chalk.hex('E4181C');
 
 				if (campionat?.campionat !== NEXT_MATCH && (campionatStartYear < startYear || campionatEndYear > endYear)) continue writeCampionati;
 
-				console.log(chalk.white(campionat.url));
-				await goto(page, campionat.url);
+				// console.log(chalk.white(campionat.url));
+				console.log(chalk.white(`🔎 looking for "LAST PAGE NR.", campionat: ${campionat?.campionat}: ${campionat?.url}`));
+
+				await navigate(page, campionat.url);
 				const lastpaPageNr = await getCampionatLastPage(page);
+
 				writePages: for (let currentPageNumber = lastpaPageNr; currentPageNumber > 0; currentPageNumber--) {
-					const URL = campionat.url + '#/page/' + currentPageNumber;
-					console.log(blue(URL));
-					await goto(page, URL);
+					const pageURL = campionat.url + '#/page/' + currentPageNumber;
+					console.log(blueFg(`🔎 looking for FIXTURES: ${pageURL}`));
+
+					await navigate(page, pageURL);
+					// await navigate(page, pageURL);
 					var fixtures = await getResults(page);
 					fixtures = fixtures?.filter(f => !!f?.date);
 
 					if (!fixtures?.length) continue writePages;
+
+					const [minTime, maxTime] = getMaxMinTimes(fixtures);
+
+					// if most recent fixture of page is older than start date, go to next page
+					if (maxTime < startDateTime) continue writePages;
+
+					// if oldest fixture of page is newer than end date, go to next campionat
+					if (minTime > endDateTime) continue writeCampionati;
 
 					fixtures = fixtures.map(fixture => {
 						const fixtureEntity = new Fixture(fixture);
@@ -136,14 +159,17 @@ const red = chalk.hex('E4181C');
 						await repoFix.save(fixtures);
 						session.totInserted += fixtures.length;
 						await repoSession.save(session);
+						console.log(
+							blueBg(
+								`📝 writed on metalo baza ${fixtures.length} fixtures, campionat: ${campionat.campionat}, league: ${league.league}, game: ${game}, from: ${new Date(minTime).toLocaleString()}, to: ${new Date(
+									maxTime
+								).toLocaleString()}, page: ${currentPageNumber}`
+							)
+						);
 					} catch (error) {
 						console.error(error);
-						writeError(error, fixtures, URL);
+						writeError(error, fixtures, pageURL);
 					}
-
-					const [minTime, maxTime] = getMaxMinTimes(fixtures);
-					if (minTime < startDateTime) continue writeCampionati;
-					if (maxTime > endDateTime) continue writePages;
 				}
 			}
 			session.totLeagues++;
@@ -156,6 +182,9 @@ const red = chalk.hex('E4181C');
 			await repoSession.save(session);
 		}
 	}
-	console.log(chalk.greenBright('wai, so terminat!'));
 	await ds.getRepository(CrawlSession).remove(session);
+	const endScrapping = Date.now();
+
+	console.log(chalk.greenBright('\ngo finio, porco zio! 🥳🥳🥳\n'));
+	console.log(`${session.totLeagues} leagues scrapped, ${session.totInserted} fixtures scrapped, ${getTTotpagesVisited()} pages visited, in ${(endScrapping - startScrapping) / time.minute} minutes`);
 })();

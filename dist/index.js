@@ -50,6 +50,7 @@ import { headlesConfirm } from './cli/headless.js';
 import { NEXT_MATCH } from './consts/various.js';
 // const { Command } = require('commander');
 import chalk from 'chalk';
+import { time } from 'iggs-utils';
 import inquirer from 'inquirer';
 import { continueInterruptedSession, continueInterruptedSessions } from './cli/continue-unfinished-sessions.js';
 import { selectGames } from './cli/select-game.js';
@@ -62,13 +63,17 @@ import { appDataSource } from './orm/orm.js';
 import { getCampionatLastPage, getCampionatList } from './services/campionat.js';
 import { writeError } from './services/error.js';
 import { getLeagueList } from './services/league.js';
-import { getPage, goto, initBrowser } from './services/puppeter.js';
+import { getPage, getTTotpagesVisited, initBrowser, navigate } from './services/puppeter.js';
 import { getResults } from './services/results.js';
 import { getMaxMinTimes } from './utils/fixture.js';
-var blue = chalk.hex('054ef7');
-var red = chalk.hex('E4181C');
+var BLUE_HEX = '0072CE';
+var RED_HEX = 'E4181C';
+var blueFg = chalk.hex(BLUE_HEX);
+var redFg = chalk.hex(RED_HEX);
+var blueBg = chalk.bgHex(BLUE_HEX);
+var redBg = chalk.bgHex(RED_HEX);
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var ds, repoSession, repoFix, session, previousSessions, puppeteerLaunchOptions, continueOldSession, continueOldSession, selectedSession, newSession, startDate, endDate, startDateTime, endDateTime, startYear, endYear, insertedLeagues, _loop_1, fixtures, _i, _a, game;
+    var ds, repoSession, repoFix, session, previousSessions, puppeteerLaunchOptions, continueOldSession, continueOldSession, selectedSession, newSession, startDate, endDate, startDateTime, endDateTime, startYear, endYear, insertedLeagues, startScrapping, _loop_1, fixtures, _i, _a, game, endScrapping;
     var _b, _c, _d, _e;
     return __generator(this, function (_f) {
         switch (_f.label) {
@@ -90,29 +95,31 @@ var red = chalk.hex('E4181C');
                 return [4 /*yield*/, inquirer.prompt(headlesConfirm)];
             case 3:
                 puppeteerLaunchOptions = _f.sent();
-                initBrowser(__assign(__assign({}, puppeteerLaunchOptions), { defaultViewport: { height: 1080, width: 1920 } }));
-                if (!(previousSessions.length === 1)) return [3 /*break*/, 5];
-                return [4 /*yield*/, inquirer.prompt(continueInterruptedSession)];
+                return [4 /*yield*/, initBrowser(__assign(__assign({}, puppeteerLaunchOptions), { defaultViewport: { height: 1080, width: 1920 } }))];
             case 4:
+                _f.sent();
+                if (!(previousSessions.length === 1)) return [3 /*break*/, 6];
+                return [4 /*yield*/, inquirer.prompt(continueInterruptedSession)];
+            case 5:
                 continueOldSession = _f.sent();
                 if (continueOldSession.continueInterruptedSession)
                     session = previousSessions[0];
-                _f.label = 5;
-            case 5:
-                if (!(previousSessions.length > 1)) return [3 /*break*/, 8];
-                return [4 /*yield*/, inquirer.prompt(continueInterruptedSessions)];
+                _f.label = 6;
             case 6:
-                continueOldSession = _f.sent();
-                if (!continueOldSession.continueInterruptedSessions) return [3 /*break*/, 8];
-                return [4 /*yield*/, inquirer.prompt(selectSession(previousSessions))];
+                if (!(previousSessions.length > 1)) return [3 /*break*/, 9];
+                return [4 /*yield*/, inquirer.prompt(continueInterruptedSessions)];
             case 7:
+                continueOldSession = _f.sent();
+                if (!continueOldSession.continueInterruptedSessions) return [3 /*break*/, 9];
+                return [4 /*yield*/, inquirer.prompt(selectSession(previousSessions))];
+            case 8:
                 selectedSession = _f.sent();
                 session = selectedSession.session;
-                _f.label = 8;
-            case 8:
-                if (!!session) return [3 /*break*/, 11];
-                return [4 /*yield*/, inquirer.prompt([startDateIn, endDateIn, selectGames])];
+                _f.label = 9;
             case 9:
+                if (!!session) return [3 /*break*/, 12];
+                return [4 /*yield*/, inquirer.prompt([startDateIn, endDateIn, selectGames])];
+            case 10:
                 newSession = _f.sent();
                 session = new CrawlSession();
                 session.start = newSession.start;
@@ -120,10 +127,10 @@ var red = chalk.hex('E4181C');
                 session.reccords = [];
                 session.games = newSession.games;
                 return [4 /*yield*/, ds.getRepository(CrawlSession).save(session)];
-            case 10:
-                session = _f.sent();
-                _f.label = 11;
             case 11:
+                session = _f.sent();
+                _f.label = 12;
+            case 12:
                 startDate = new Date(session.start);
                 endDate = new Date(session.end);
                 startDateTime = startDate.getTime();
@@ -136,11 +143,14 @@ var red = chalk.hex('E4181C');
                     console.log('hai mai insiarca odat, si nu si timpit');
                     return [2 /*return*/];
                 }
+                startScrapping = Date.now();
                 _loop_1 = function (game) {
                     var page, leagues, _loop_2, _g, leagues_1, league;
                     return __generator(this, function (_h) {
                         switch (_h.label) {
-                            case 0: return [4 /*yield*/, getPage(LEAGUES_URL[game])];
+                            case 0:
+                                console.log(redFg("\uD83D\uDD0E looking for LEAGUES, game: ".concat(game, ": ").concat(LEAGUES_URL[game])));
+                                return [4 /*yield*/, getPage(LEAGUES_URL[game])];
                             case 1:
                                 page = _h.sent();
                                 return [4 /*yield*/, getLeagueList(page, game)];
@@ -153,15 +163,15 @@ var red = chalk.hex('E4181C');
                                             case 0:
                                                 if (insertedLeagues === null || insertedLeagues === void 0 ? void 0 : insertedLeagues.includes(league.league))
                                                     return [2 /*return*/, "continue"];
-                                                console.log(red(league.url));
-                                                return [4 /*yield*/, goto(page, league.url)];
+                                                return [4 /*yield*/, navigate(page, league.url)];
                                             case 1:
                                                 _k.sent();
+                                                console.log(redFg("\uD83D\uDD0E looking for CAMPIONATI, league: ".concat(league === null || league === void 0 ? void 0 : league.league, ": ").concat(league === null || league === void 0 ? void 0 : league.url)));
                                                 return [4 /*yield*/, getCampionatList(page)];
                                             case 2:
                                                 campionati = _k.sent();
                                                 _loop_3 = function (campionat) {
-                                                    var years, campionatStartYear, campionatEndYear, lastpaPageNr, currentPageNumber, URL_1, error_1, _l, minTime, maxTime;
+                                                    var years, campionatStartYear, campionatEndYear, lastpaPageNr, currentPageNumber, pageURL, _l, minTime, maxTime, error_1;
                                                     return __generator(this, function (_m) {
                                                         switch (_m.label) {
                                                             case 0:
@@ -172,8 +182,9 @@ var red = chalk.hex('E4181C');
                                                                 campionatEndYear = (years === null || years === void 0 ? void 0 : years[1]) || (years === null || years === void 0 ? void 0 : years[0]);
                                                                 if ((campionat === null || campionat === void 0 ? void 0 : campionat.campionat) !== NEXT_MATCH && (campionatStartYear < startYear || campionatEndYear > endYear))
                                                                     return [2 /*return*/, "continue-writeCampionati"];
-                                                                console.log(chalk.white(campionat.url));
-                                                                return [4 /*yield*/, goto(page, campionat.url)];
+                                                                // console.log(chalk.white(campionat.url));
+                                                                console.log(chalk.white("\uD83D\uDD0E looking for \"LAST PAGE NR.\", campionat: ".concat(campionat === null || campionat === void 0 ? void 0 : campionat.campionat, ": ").concat(campionat === null || campionat === void 0 ? void 0 : campionat.url)));
+                                                                return [4 /*yield*/, navigate(page, campionat.url)];
                                                             case 1:
                                                                 _m.sent();
                                                                 return [4 /*yield*/, getCampionatLastPage(page)];
@@ -182,18 +193,26 @@ var red = chalk.hex('E4181C');
                                                                 currentPageNumber = lastpaPageNr;
                                                                 _m.label = 3;
                                                             case 3:
-                                                                if (!(currentPageNumber > 0)) return [3 /*break*/, 12];
-                                                                URL_1 = campionat.url + '#/page/' + currentPageNumber;
-                                                                console.log(blue(URL_1));
-                                                                return [4 /*yield*/, goto(page, URL_1)];
+                                                                if (!(currentPageNumber > 0)) return [3 /*break*/, 11];
+                                                                pageURL = campionat.url + '#/page/' + currentPageNumber;
+                                                                console.log(blueFg("\uD83D\uDD0E looking for FIXTURES: ".concat(pageURL)));
+                                                                return [4 /*yield*/, navigate(page, pageURL)];
                                                             case 4:
                                                                 _m.sent();
                                                                 return [4 /*yield*/, getResults(page)];
                                                             case 5:
+                                                                // await navigate(page, pageURL);
                                                                 fixtures = _m.sent();
                                                                 fixtures = fixtures === null || fixtures === void 0 ? void 0 : fixtures.filter(function (f) { return !!(f === null || f === void 0 ? void 0 : f.date); });
                                                                 if (!(fixtures === null || fixtures === void 0 ? void 0 : fixtures.length))
-                                                                    return [3 /*break*/, 11];
+                                                                    return [3 /*break*/, 10];
+                                                                _l = getMaxMinTimes(fixtures), minTime = _l[0], maxTime = _l[1];
+                                                                // if most recent fixture of page is older than start date, go to next page
+                                                                if (maxTime < startDateTime)
+                                                                    return [3 /*break*/, 10];
+                                                                // if oldest fixture of page is newer than end date, go to next campionat
+                                                                if (minTime > endDateTime)
+                                                                    return [2 /*return*/, "continue-writeCampionati"];
                                                                 fixtures = fixtures.map(function (fixture) {
                                                                     var fixtureEntity = new Fixture(fixture);
                                                                     fixtureEntity.campionat = campionat.campionat;
@@ -211,23 +230,17 @@ var red = chalk.hex('E4181C');
                                                                 return [4 /*yield*/, repoSession.save(session)];
                                                             case 8:
                                                                 _m.sent();
+                                                                console.log(blueBg("\uD83D\uDCDD writed on metalo baza ".concat(fixtures.length, " fixtures, campionat: ").concat(campionat.campionat, ", league: ").concat(league.league, ", game: ").concat(game, ", from: ").concat(new Date(minTime).toLocaleString(), ", to: ").concat(new Date(maxTime).toLocaleString(), ", page: ").concat(currentPageNumber)));
                                                                 return [3 /*break*/, 10];
                                                             case 9:
                                                                 error_1 = _m.sent();
                                                                 console.error(error_1);
-                                                                writeError(error_1, fixtures, URL_1);
+                                                                writeError(error_1, fixtures, pageURL);
                                                                 return [3 /*break*/, 10];
                                                             case 10:
-                                                                _l = getMaxMinTimes(fixtures), minTime = _l[0], maxTime = _l[1];
-                                                                if (minTime < startDateTime)
-                                                                    return [2 /*return*/, "continue-writeCampionati"];
-                                                                if (maxTime > endDateTime)
-                                                                    return [3 /*break*/, 11];
-                                                                _m.label = 11;
-                                                            case 11:
                                                                 currentPageNumber--;
                                                                 return [3 /*break*/, 3];
-                                                            case 12: return [2 /*return*/];
+                                                            case 11: return [2 /*return*/];
                                                         }
                                                     });
                                                 };
@@ -279,22 +292,23 @@ var red = chalk.hex('E4181C');
                     });
                 };
                 _i = 0, _a = session.games;
-                _f.label = 12;
-            case 12:
-                if (!(_i < _a.length)) return [3 /*break*/, 15];
+                _f.label = 13;
+            case 13:
+                if (!(_i < _a.length)) return [3 /*break*/, 16];
                 game = _a[_i];
                 return [5 /*yield**/, _loop_1(game)];
-            case 13:
-                _f.sent();
-                _f.label = 14;
             case 14:
-                _i++;
-                return [3 /*break*/, 12];
-            case 15:
-                console.log(chalk.greenBright('wai, so terminat!'));
-                return [4 /*yield*/, ds.getRepository(CrawlSession).remove(session)];
-            case 16:
                 _f.sent();
+                _f.label = 15;
+            case 15:
+                _i++;
+                return [3 /*break*/, 13];
+            case 16: return [4 /*yield*/, ds.getRepository(CrawlSession).remove(session)];
+            case 17:
+                _f.sent();
+                endScrapping = Date.now();
+                console.log(chalk.greenBright('\ngo finio, porco zio! 🥳🥳🥳\n'));
+                console.log("".concat(session.totLeagues, " leagues scrapped, ").concat(session.totInserted, " fixtures scrapped, ").concat(getTTotpagesVisited(), " pages visited, in ").concat((endScrapping - startScrapping) / time.minute, " minutes"));
                 return [2 /*return*/];
         }
     });

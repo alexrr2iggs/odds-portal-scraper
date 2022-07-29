@@ -34,24 +34,34 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import { getCampionatLastPage } from './services/campionat.js';
-import { getPage, initBrowser } from './services/puppeter.js';
-initBrowser();
+import { Fixture } from './entities/fixture.js';
+// initBrowser();
+import { appDataSource } from './orm/orm.js';
+import { initBrowser } from './services/puppeter.js';
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var page, fixtures;
+    var ds, repoFix, fixtures;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, initBrowser({ headless: false, defaultViewport: { height: 1080, width: 1920 } })];
             case 1:
                 _a.sent();
-                return [4 /*yield*/, getPage('https://www.oddsportal.com/badminton/singapore/bwf-world-tour-singapore-open-doubles-women/results/')];
+                return [4 /*yield*/, appDataSource.initialize()];
             case 2:
-                page = _a.sent();
-                console.log('start');
-                return [4 /*yield*/, getCampionatLastPage(page)];
+                ds = _a.sent();
+                repoFix = ds.getRepository(Fixture);
+                return [4 /*yield*/, repoFix.find({
+                        where: { campionat: 'NEXT_MATCH' }
+                    })];
             case 3:
                 fixtures = _a.sent();
-                console.log(fixtures);
+                fixtures.forEach(function (f) { return (f.campionat = 'modificat ba'); });
+                return [4 /*yield*/, repoFix.save(fixtures)];
+            case 4:
+                _a.sent();
+                // const page = await getPage('https://www.oddsportal.com/badminton/singapore/bwf-world-tour-singapore-open-doubles-women/results/');
+                // console.log('start');
+                // var fixtures = await getCampionatLastPage(page);
+                // console.log(fixtures);
                 console.log('end');
                 return [2 /*return*/];
         }

@@ -7,7 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Game } from '../types/sport.js';
 var Fixture = /** @class */ (function () {
     function Fixture(fixture) {
@@ -66,6 +66,14 @@ var Fixture = /** @class */ (function () {
         Column(),
         __metadata("design:type", String)
     ], Fixture.prototype, "game");
+    __decorate([
+        CreateDateColumn({ "default": new Date().toISOString() }),
+        __metadata("design:type", Number)
+    ], Fixture.prototype, "createdAt");
+    __decorate([
+        UpdateDateColumn({ "default": new Date().toISOString() }),
+        __metadata("design:type", String)
+    ], Fixture.prototype, "updatedAt");
     Fixture = __decorate([
         Entity()
         // @Unique('all unique', ['campionat', 'league', 'date', 'team1', 'team2'])

@@ -54,7 +54,7 @@ import { initBrowser } from './services/puppeter.js';
                     })];
             case 3:
                 fixtures = _a.sent();
-                fixtures.forEach(function (f) { return (f.campionat = 'modificat ba'); });
+                fixtures.forEach(function (f) { return (f.campionat = 'updated'); });
                 return [4 /*yield*/, repoFix.save(fixtures)];
             case 4:
                 _a.sent();

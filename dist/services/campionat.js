@@ -10,11 +10,12 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 import { time } from 'iggs-utils';
 import { SOCCER_CAMPIONAT_ANCHORS, SOCCER_CAMPIONAT_PAGINATOR_ANCHORS } from '../consts/css-selectors.js';
 import { NEXT_MATCH, WHAIT_FOR_ELEMENT_TIMEOUT } from '../consts/various.js';
+import { writeError } from './error.js';
 export function getCampionatList(page) {
-    return page
-        .$eval('#breadcrumb', function (el) { return el.textContent; })
+    return breadcrumbInnerText(page)
         .then(function (textContent) {
-        if (textContent.trim().toUpperCase() === 'THE PAGE YOU REQUESTED IS NOT AVAILABLE.')
+        var _a;
+        if (((_a = textContent === null || textContent === void 0 ? void 0 : textContent.trim()) === null || _a === void 0 ? void 0 : _a.toUpperCase()) === 'THE PAGE YOU REQUESTED IS NOT AVAILABLE.')
             return [];
         return page
             .waitForSelector(SOCCER_CAMPIONAT_ANCHORS, { timeout: WHAIT_FOR_ELEMENT_TIMEOUT })
@@ -30,10 +31,9 @@ export function getCampionatList(page) {
     });
 }
 export function getCampionatNextMatches(page) {
-    return page
-        .$eval('#breadcrumb', function (el) { return el.textContent; })
-        .then(function (textContent) {
-        if (textContent.trim().toUpperCase() === 'THE PAGE YOU REQUESTED IS NOT AVAILABLE.')
+    return breadcrumbInnerText(page).then(function (textContent) {
+        var _a;
+        if (((_a = textContent === null || textContent === void 0 ? void 0 : textContent.trim()) === null || _a === void 0 ? void 0 : _a.toUpperCase()) === 'THE PAGE YOU REQUESTED IS NOT AVAILABLE.')
             return '';
         return page
             .waitForSelector('#tournament_menu a', { timeout: WHAIT_FOR_ELEMENT_TIMEOUT })
@@ -42,6 +42,11 @@ export function getCampionatNextMatches(page) {
             return '';
         });
     });
+}
+function breadcrumbInnerText(page) {
+    return page
+        .waitForSelector('#breadcrumb', { timeout: WHAIT_FOR_ELEMENT_TIMEOUT })["catch"](function (err) { return writeError(err, [], page.url()); })
+        .then(function () { return page.$eval('#breadcrumb', function (el) { return el.textContent; }); });
 }
 export function getCampionatLastPage(page) {
     return page.$('#emptyMsg').then(function (emptyMsg) {

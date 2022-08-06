@@ -1,5 +1,9 @@
 import { Game } from '../types/sport.js';
 import { CrawlSessionReccord } from './crawl-session-reccord.js';
+export declare enum SessionCreator {
+    SYSTEM = "SYSTEM",
+    USER = "USER"
+}
 export declare class CrawlSession {
     ID?: number;
     reccords?: CrawlSessionReccord[];
@@ -8,7 +12,9 @@ export declare class CrawlSession {
     end?: string;
     totInserted?: number;
     totLeagues?: number;
-    createdAt?: number;
+    createdBy: SessionCreator;
+    complete: boolean;
+    createdAt?: string;
     updatedAt?: string;
 }
 export declare function scrapSessiontoString(cs: CrawlSession): string;

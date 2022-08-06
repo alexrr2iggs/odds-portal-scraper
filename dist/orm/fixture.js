@@ -34,7 +34,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-export function writeFixtures(fixtures, session, repoFix, repoSex) {
+import { time } from "iggs-utils";
+import { writeError } from "../services/error.js";
+import { sleep } from "../utils/varoius.js";
+export function writeFixtures(fixtures, session, repoFix, repoSex, url) {
     return __awaiter(this, void 0, void 0, function () {
         var _i, fixtures_1, fixture, error_1;
         return __generator(this, function (_a) {
@@ -48,7 +51,7 @@ export function writeFixtures(fixtures, session, repoFix, repoSex) {
                     _a.label = 2;
                 case 2:
                     _a.trys.push([2, 5, , 6]);
-                    return [4 /*yield*/, repoFix.save(fixture)];
+                    return [4 /*yield*/, writeFixture(fixture, repoFix, url)];
                 case 3:
                     _a.sent();
                     session.totInserted++;
@@ -58,12 +61,59 @@ export function writeFixtures(fixtures, session, repoFix, repoSex) {
                     return [3 /*break*/, 6];
                 case 5:
                     error_1 = _a.sent();
+                    writeError(error_1, [fixture], url);
                     console.error(error_1);
                     return [3 /*break*/, 6];
                 case 6:
                     _i++;
                     return [3 /*break*/, 1];
                 case 7: return [2 /*return*/];
+            }
+        });
+    });
+}
+export function writeFixture(fixture, repoFix, url) {
+    return __awaiter(this, void 0, void 0, function () {
+        var error, i, err_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    i = 1;
+                    _a.label = 1;
+                case 1:
+                    if (!(i <= 30)) return [3 /*break*/, 7];
+                    _a.label = 2;
+                case 2:
+                    _a.trys.push([2, 4, , 6]);
+                    return [4 /*yield*/, repoFix.save(fixture)];
+                case 3: return [2 /*return*/, _a.sent()];
+                case 4:
+                    err_1 = _a.sent();
+                    error = err_1;
+                    console.error('error writing fixture on db. attempt: ' + i);
+                    try {
+                        console.error(JSON.stringify(fixture));
+                    }
+                    catch (erro) {
+                        console.error(erro);
+                    }
+                    console.error(error);
+                    return [4 /*yield*/, sleep(i * time.seccond)];
+                case 5:
+                    _a.sent();
+                    return [3 /*break*/, 6];
+                case 6:
+                    i++;
+                    return [3 /*break*/, 1];
+                case 7:
+                    try {
+                        writeError(error, [fixture], url);
+                    }
+                    catch (e) {
+                        console.error(e);
+                    }
+                    process.exit(1);
+                    return [2 /*return*/];
             }
         });
     });

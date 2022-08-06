@@ -34,35 +34,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import { Fixture } from './entities/fixture.js';
-// initBrowser();
-import { appDataSource } from './orm/orm.js';
-import { initBrowser } from './services/puppeter.js';
+import { getPage, initBrowser } from './services/puppeter.js';
+import { getResults } from './services/results.js';
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var ds, repoFix, fixtures;
+    var page, fixtures;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, initBrowser({ headless: false, defaultViewport: { height: 1080, width: 1920 } })];
+            case 0: return [4 /*yield*/, initBrowser({ headless: true, defaultViewport: { height: 1080, width: 1920 } })];
             case 1:
                 _a.sent();
-                return [4 /*yield*/, appDataSource.initialize()];
+                return [4 /*yield*/, getPage('https://www.oddsportal.com/soccer/usa/mls/#/page/1')];
             case 2:
-                ds = _a.sent();
-                repoFix = ds.getRepository(Fixture);
-                return [4 /*yield*/, repoFix.find({
-                        where: { campionat: 'NEXT_MATCH' }
-                    })];
+                page = _a.sent();
+                return [4 /*yield*/, getResults(page)];
             case 3:
                 fixtures = _a.sent();
-                fixtures.forEach(function (f) { return (f.campionat = 'updated'); });
-                return [4 /*yield*/, repoFix.save(fixtures)];
-            case 4:
-                _a.sent();
-                // const page = await getPage('https://www.oddsportal.com/badminton/singapore/bwf-world-tour-singapore-open-doubles-women/results/');
-                // console.log('start');
-                // var fixtures = await getCampionatLastPage(page);
-                // console.log(fixtures);
-                console.log('end');
+                console.log(fixtures);
                 return [2 /*return*/];
         }
     });

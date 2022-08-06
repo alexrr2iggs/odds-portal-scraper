@@ -8,6 +8,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 import { Entity, Column, PrimaryGeneratedColumn, JoinColumn, ManyToOne, CreateDateColumn } from "typeorm";
+import { Game } from "../types/sport.js";
 import { CrawlSession } from "./crawl-session.js";
 var CrawlSessionReccord = /** @class */ (function () {
     function CrawlSessionReccord() {
@@ -26,7 +27,15 @@ var CrawlSessionReccord = /** @class */ (function () {
         __metadata("design:type", String)
     ], CrawlSessionReccord.prototype, "league");
     __decorate([
-        CreateDateColumn({ "default": new Date().toISOString() }),
+        Column(),
+        __metadata("design:type", String)
+    ], CrawlSessionReccord.prototype, "country");
+    __decorate([
+        Column(),
+        __metadata("design:type", String)
+    ], CrawlSessionReccord.prototype, "game");
+    __decorate([
+        CreateDateColumn(),
         __metadata("design:type", String)
     ], CrawlSessionReccord.prototype, "createdAt");
     CrawlSessionReccord = __decorate([

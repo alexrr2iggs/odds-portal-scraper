@@ -1,8 +1,10 @@
 import { Game } from '../types/sport.js';
 export declare class Fixture {
     constructor(fixture?: Fixture);
-    campionat?: string;
-    league?: string;
+    ID: string;
+    campionat: string;
+    league: string;
+    country: string;
     date: string;
     team1: string;
     team2: string;
@@ -12,7 +14,7 @@ export declare class Fixture {
     quotex: number;
     quote2: number;
     game: Game;
-    createdAt?: number;
+    createdAt?: Date;
     updatedAt?: string;
 }
 //# sourceMappingURL=fixture.d.ts.map

@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
-import { join, resolve } from 'path';
+import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { join, resolve } from "path";
 export function writeError(e, fixtures, fixturePageUrl) {
     var errors_dir = join(resolve(), 'errors');
     if (!existsSync(errors_dir)) {
@@ -18,23 +18,19 @@ export function writeError(e, fixtures, fixturePageUrl) {
         console.error(error);
     }
     try {
-        if (fixturePageUrl === null || fixturePageUrl === void 0 ? void 0 : fixturePageUrl.length)
-            writeFileSync(join(error_dir, 'url.txt'), fixturePageUrl);
+        writeFileSync(join(error_dir, 'url.txt'), fixturePageUrl);
     }
     catch (error) {
         console.error(error);
     }
     try {
-        var errorStr = (e === null || e === void 0 ? void 0 : e.message) || (e === null || e === void 0 ? void 0 : e.toString()) || (JSON === null || JSON === void 0 ? void 0 : JSON.stringify(e));
-        if (errorStr === null || errorStr === void 0 ? void 0 : errorStr.length)
-            writeFileSync(join(error_dir, 'error.txt'), errorStr);
+        writeFileSync(join(error_dir, 'error.txt'), (e === null || e === void 0 ? void 0 : e.message) || (e === null || e === void 0 ? void 0 : e.toString()));
     }
     catch (error) {
         console.error(error);
     }
     try {
-        if (fixtures === null || fixtures === void 0 ? void 0 : fixtures.length)
-            writeFileSync(join(error_dir, 'fixtures.json'), JSON.stringify(fixtures, null, 4));
+        writeFileSync(join(error_dir, 'fixtures.json'), JSON.stringify(fixtures, null, 4));
     }
     catch (error) {
         console.error(error);

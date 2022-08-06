@@ -7,6 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+import { bytes } from 'iggs-utils';
 import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Game } from '../types/sport.js';
 var Fixture = /** @class */ (function () {
@@ -23,23 +24,31 @@ var Fixture = /** @class */ (function () {
         this.quote2 = fixture === null || fixture === void 0 ? void 0 : fixture.quote2;
     }
     __decorate([
+        PrimaryColumn(),
+        __metadata("design:type", String)
+    ], Fixture.prototype, "ID");
+    __decorate([
         Column(),
         __metadata("design:type", String)
     ], Fixture.prototype, "campionat");
     __decorate([
-        PrimaryColumn(),
+        Column(),
         __metadata("design:type", String)
     ], Fixture.prototype, "league");
     __decorate([
-        PrimaryColumn(),
+        Column(),
+        __metadata("design:type", String)
+    ], Fixture.prototype, "country");
+    __decorate([
+        Column(),
         __metadata("design:type", String)
     ], Fixture.prototype, "date");
     __decorate([
-        PrimaryColumn(),
+        Column({ type: 'varchar', length: bytes.kB }),
         __metadata("design:type", String)
     ], Fixture.prototype, "team1");
     __decorate([
-        PrimaryColumn(),
+        Column({ type: 'varchar', length: bytes.kB }),
         __metadata("design:type", String)
     ], Fixture.prototype, "team2");
     __decorate([
@@ -51,15 +60,15 @@ var Fixture = /** @class */ (function () {
         __metadata("design:type", Number)
     ], Fixture.prototype, "team2Score");
     __decorate([
-        Column(),
+        Column({ type: 'double' }),
         __metadata("design:type", Number)
     ], Fixture.prototype, "quote1");
     __decorate([
-        Column({ nullable: true }),
+        Column({ nullable: true, type: 'double' }),
         __metadata("design:type", Number)
     ], Fixture.prototype, "quotex");
     __decorate([
-        Column(),
+        Column({ type: 'double' }),
         __metadata("design:type", Number)
     ], Fixture.prototype, "quote2");
     __decorate([
@@ -67,11 +76,11 @@ var Fixture = /** @class */ (function () {
         __metadata("design:type", String)
     ], Fixture.prototype, "game");
     __decorate([
-        CreateDateColumn({ "default": new Date().toISOString() }),
-        __metadata("design:type", Number)
+        CreateDateColumn(),
+        __metadata("design:type", Date)
     ], Fixture.prototype, "createdAt");
     __decorate([
-        UpdateDateColumn({ "default": new Date().toISOString() }),
+        UpdateDateColumn(),
         __metadata("design:type", String)
     ], Fixture.prototype, "updatedAt");
     Fixture = __decorate([

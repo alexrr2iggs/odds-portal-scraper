@@ -84,7 +84,7 @@ export function getMatches(page) {
         });
     })["catch"](function (e) {
         console.error(e);
-        return [];
+        return Promise.reject(e);
     });
 }
 //# sourceMappingURL=matches.js.map

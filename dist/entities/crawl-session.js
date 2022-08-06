@@ -8,8 +8,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 import { bytes } from 'iggs-utils';
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { CrawlSessionReccord } from './crawl-session-reccord.js';
+export var SessionCreator;
+(function (SessionCreator) {
+    SessionCreator["SYSTEM"] = "SYSTEM";
+    SessionCreator["USER"] = "USER";
+})(SessionCreator || (SessionCreator = {}));
 var gamesTransformer = {
     to: function (games) {
         return JSON.stringify(games);
@@ -31,7 +36,7 @@ var CrawlSession = /** @class */ (function () {
         __metadata("design:type", Array)
     ], CrawlSession.prototype, "reccords");
     __decorate([
-        Column({ type: 'varchar', length: 5 * bytes.kB, transformer: gamesTransformer }),
+        Column({ type: 'varchar', length: 3 * bytes.kB, transformer: gamesTransformer }),
         __metadata("design:type", Array)
     ], CrawlSession.prototype, "games");
     __decorate([
@@ -51,11 +56,19 @@ var CrawlSession = /** @class */ (function () {
         __metadata("design:type", Number)
     ], CrawlSession.prototype, "totLeagues");
     __decorate([
-        CreateDateColumn({ "default": new Date().toISOString() }),
-        __metadata("design:type", Number)
+        Column(),
+        __metadata("design:type", String)
+    ], CrawlSession.prototype, "createdBy");
+    __decorate([
+        Column({ "default": false }),
+        __metadata("design:type", Boolean)
+    ], CrawlSession.prototype, "complete");
+    __decorate([
+        Column({ "default": new Date().toISOString() }),
+        __metadata("design:type", String)
     ], CrawlSession.prototype, "createdAt");
     __decorate([
-        UpdateDateColumn({ "default": new Date().toISOString() }),
+        Column({ "default": new Date().toISOString() }),
         __metadata("design:type", String)
     ], CrawlSession.prototype, "updatedAt");
     CrawlSession = __decorate([

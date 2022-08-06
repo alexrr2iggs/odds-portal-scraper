@@ -1,4 +1,5 @@
 import { Entity, Column, Unique, PrimaryGeneratedColumn, JoinColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from "typeorm"
+import { Game } from "../types/sport.js";
 import { CrawlSession } from "./crawl-session.js";
 
 
@@ -15,6 +16,12 @@ export class CrawlSessionReccord {
     @Column()
     league: string;
 
-    @CreateDateColumn({ default: new Date().toISOString() })
+    @Column()
+    country: string;
+
+    @Column()
+    game: Game;
+
+    @CreateDateColumn()
     createdAt?: string;
 }

@@ -1,5 +1,8 @@
+import { bytes } from 'iggs-utils';
 import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Game } from '../types/sport.js';
+
+
 
 @Entity()
 // @Unique('all unique', ['campionat', 'league', 'date', 'team1', 'team2'])
@@ -16,22 +19,27 @@ export class Fixture {
 		this.quotex = fixture?.quotex;
 		this.quote2 = fixture?.quote2;
 	}
-	// @PrimaryGeneratedColumn()
-	// ID: number
+
+
+	 @PrimaryColumn()
+	 ID: string;
 
 	@Column()
-	campionat?: string;
+	campionat: string;
 
-	@PrimaryColumn()
-	league?: string;
+	@Column()
+	league: string;
 
-	@PrimaryColumn()
+	@Column()
+	country: string;
+
+	@Column()
 	date: string;
 
-	@PrimaryColumn()
+	@Column({type:'varchar', length:bytes.kB})
 	team1: string;
 
-	@PrimaryColumn()
+	@Column({type:'varchar', length:bytes.kB})
 	team2: string;
 
 	@Column({ nullable: true })
@@ -40,21 +48,21 @@ export class Fixture {
 	@Column({ nullable: true })
 	team2Score: number;
 
-	@Column()
+	@Column({type:'double'})
 	quote1: number;
 
-	@Column({ nullable: true })
+	@Column({ nullable: true, type:'double' })
 	quotex: number;
 
-	@Column()
+	@Column({type:'double'})
 	quote2: number;
 
 	@Column()
 	game: Game;
 
-	@CreateDateColumn({ default: new Date().toISOString() })
-	createdAt?: number;
+	@CreateDateColumn()
+	createdAt?: Date;
 
-	@UpdateDateColumn({ default: new Date().toISOString() })
+	@UpdateDateColumn()
 	updatedAt?: string;
 }

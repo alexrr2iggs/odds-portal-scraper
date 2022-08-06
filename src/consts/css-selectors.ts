@@ -34,3 +34,6 @@ export const LEAGUES_ANCHORS: { [key in Game]: string } = {
 	VOLLEYBALL: '#archive-tables table.table-main [xsid="12"] td a',
 	WATER_POLO: '#archive-tables table.table-main [xsid="22"] td a'
 };
+
+
+

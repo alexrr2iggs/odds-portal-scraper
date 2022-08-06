@@ -16,6 +16,8 @@
     "iggs-utils": "^1.2.2",
     "inquirer": "^9.0.2",
     "luxon": "^3.0.1",
+    "mariadb": "^3.0.1",
+    "mysql": "^2.18.1",
     "pino": "^8.3.0",
     "puppeteer": "^15.5.0",
     "rxjs": "^7.5.6",

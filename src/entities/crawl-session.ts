@@ -3,6 +3,12 @@ import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGenerat
 import { Game } from '../types/sport.js';
 import { CrawlSessionReccord } from './crawl-session-reccord.js';
 
+export enum SessionCreator{
+	SYSTEM='SYSTEM',
+	USER='USER'
+}
+
+
 const gamesTransformer: ValueTransformer = {
 	to: function (games: Game[]) {
 		return JSON.stringify(games);
@@ -21,7 +27,7 @@ export class CrawlSession {
 	@JoinColumn()
 	reccords?: CrawlSessionReccord[];
 
-	@Column({ type: 'varchar', length: 5 * bytes.kB, transformer: gamesTransformer })
+	@Column({ type: 'varchar', length: 3 * bytes.kB, transformer: gamesTransformer })
 	games?: Game[];
 
 	@Column()
@@ -36,11 +42,19 @@ export class CrawlSession {
 	@Column({ default: 0 })
 	totLeagues?: number;
 
-	@CreateDateColumn({ default: new Date().toISOString() })
-	createdAt?: number;
+	@Column()
+	createdBy:SessionCreator
 
-	@UpdateDateColumn({ default: new Date().toISOString() })
+	@Column({default:false})
+	complete:boolean
+
+	@Column({default:new Date().toISOString()})
+	createdAt?: string;
+
+	@Column({default:new Date().toISOString()})
 	updatedAt?: string;
+
+
 }
 
 export function scrapSessiontoString(cs: CrawlSession): string {

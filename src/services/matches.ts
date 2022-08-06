@@ -97,6 +97,6 @@ export function getMatches(page: Page): Promise<Fixture[]> {
 		)
 		.catch(e => {
 			console.error(e);
-			return [];
+			return Promise.reject(e);
 		});
 }

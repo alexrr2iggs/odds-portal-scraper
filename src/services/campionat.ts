@@ -2,18 +2,18 @@ import { time } from 'iggs-utils';
 import { Page } from 'puppeteer';
 import { SOCCER_CAMPIONAT_ANCHORS, SOCCER_CAMPIONAT_PAGINATOR_ANCHORS } from '../consts/css-selectors.js';
 import { NEXT_MATCH, WHAIT_FOR_ELEMENT_TIMEOUT } from '../consts/various.js';
-import { writeError } from './error.js';
 
 export function getCampionatList(page: Page): Promise<{ campionat: string; url: string }[]> {
-	return breadcrumbInnerText(page)
+	return page
+		.$eval('#breadcrumb', el => el.textContent)
 		.then(textContent => {
-			if (textContent?.trim()?.toUpperCase() === 'THE PAGE YOU REQUESTED IS NOT AVAILABLE.') return [];
+			if (textContent.trim().toUpperCase() === 'THE PAGE YOU REQUESTED IS NOT AVAILABLE.') return [];
 			return page
 				.waitForSelector(SOCCER_CAMPIONAT_ANCHORS, { timeout: WHAIT_FOR_ELEMENT_TIMEOUT })
 				.then(() => page.$$eval(SOCCER_CAMPIONAT_ANCHORS, (anchors: HTMLAnchorElement[]) => anchors?.map(anchor => ({ campionat: anchor.textContent, url: anchor.href }))))
 				.catch(e => {
 					console.error(e);
-					return [];
+					return Promise.reject(e);
 				});
 		})
 		.then(campionatList => {
@@ -24,23 +24,17 @@ export function getCampionatList(page: Page): Promise<{ campionat: string; url: 
 }
 
 export function getCampionatNextMatches(page: Page): Promise<string> {
-	return breadcrumbInnerText(page).then(textContent => {
-		if (textContent?.trim()?.toUpperCase() === 'THE PAGE YOU REQUESTED IS NOT AVAILABLE.') return '';
-		return page
-			.waitForSelector('#tournament_menu a', { timeout: WHAIT_FOR_ELEMENT_TIMEOUT })
-			.then(() => page.$$eval('#tournament_menu a', (anchors: HTMLAnchorElement[]) => anchors?.find(a => a?.textContent?.trim()?.toUpperCase() === 'NEXT MATCHES')?.href))
-			.catch(e => {
-				console.error(e);
-				return '';
-			});
-	});
-}
-
-function breadcrumbInnerText(page: Page): Promise<string> {
 	return page
-		.waitForSelector('#breadcrumb', { timeout: WHAIT_FOR_ELEMENT_TIMEOUT })
-		.catch(err => writeError(err, [], page.url()))
-		.then(() => page.$eval('#breadcrumb', el => el.textContent));
+		.$eval('#breadcrumb', el => el.textContent)
+		.then(textContent => {
+			if (textContent.trim().toUpperCase() === 'THE PAGE YOU REQUESTED IS NOT AVAILABLE.') return '';
+			return page
+				.waitForSelector('#tournament_menu a', { timeout: WHAIT_FOR_ELEMENT_TIMEOUT })
+				.then(() => page.$$eval('#tournament_menu a', (anchors: HTMLAnchorElement[]) => anchors?.find(a => a?.textContent?.trim()?.toUpperCase() === 'NEXT MATCHES')?.href))
+				.catch(e => {
+					return Promise.reject(e);
+				});
+		});
 }
 
 export function getCampionatLastPage(page: Page): Promise<number> {

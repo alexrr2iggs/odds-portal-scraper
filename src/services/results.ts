@@ -122,19 +122,16 @@ import { TOURNAMENT_TABLE_TBODY } from './../consts/css-selectors.js';
 // 		});
 // }
 
-
-export async function  getResults(resultsPage: Page): Promise<Fixture[]> {
+export async function getResults(resultsPage: Page): Promise<Fixture[]> {
 	await resultsPage.waitForSelector(TOURNAMENT_TABLE_TBODY, { timeout: WHAIT_FOR_ELEMENT_TIMEOUT });
 	await resultsPage.evaluate(() => {
-		
 		try {
 			//@ts-ignore
 			page.showHiddenEvents();
 		} catch (error) {
 			console.error(error);
 		}
-	  });
-
+	});
 
 	return await resultsPage.$eval(TOURNAMENT_TABLE_TBODY, (table: HTMLTableElement) => {
 		///--------------------- UTIL FUNCTIONS ---------------------///
@@ -156,9 +153,9 @@ export async function  getResults(resultsPage: Page): Promise<Fixture[]> {
 		};
 
 		const YYYYMMdd = (date: Date) => {
-			const dd = date.getDate();
-			const MM = date.getMonth() + 1;
-			const YYYY = date.getFullYear();
+			const dd = date.getUTCDate();
+			const MM = date.getUTCMonth() + 1;
+			const YYYY = date.getUTCFullYear();
 			return [YYYY, MM, dd].join('-');
 		};
 
@@ -236,4 +233,3 @@ export async function  getResults(resultsPage: Page): Promise<Fixture[]> {
 		return retVal;
 	});
 }
-

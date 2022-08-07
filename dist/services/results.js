@@ -175,9 +175,9 @@ export function getResults(resultsPage) {
                                 return ((_d = cleanTxt === null || cleanTxt === void 0 ? void 0 : cleanTxt.split(':')) === null || _d === void 0 ? void 0 : _d.map(function (s) { return +s; })) || [];
                             };
                             var YYYYMMdd = function (date) {
-                                var dd = date.getDate();
-                                var MM = date.getMonth() + 1;
-                                var YYYY = date.getFullYear();
+                                var dd = date.getUTCDate();
+                                var MM = date.getUTCMonth() + 1;
+                                var YYYY = date.getUTCFullYear();
                                 return [YYYY, MM, dd].join('-');
                             };
                             var getDateStr = function (tr) {

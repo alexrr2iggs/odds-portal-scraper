@@ -43,7 +43,7 @@ import { getResults } from './services/results.js';
             case 0: return [4 /*yield*/, initBrowser({ headless: true, defaultViewport: { height: 1080, width: 1920 } })];
             case 1:
                 _a.sent();
-                return [4 /*yield*/, getPage('https://www.oddsportal.com/soccer/usa/mls/#/page/1')];
+                return [4 /*yield*/, getPage('https://www.oddsportal.com/soccer/germany/oberliga-bayern-nord/results/')];
             case 2:
                 page = _a.sent();
                 return [4 /*yield*/, getResults(page)];
